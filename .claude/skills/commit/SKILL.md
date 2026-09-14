@@ -22,6 +22,8 @@ Si no coincide, corrígela con `git config user.name` / `git config user.email` 
 
 Ejecuta `git status` y `git diff` (staged y unstaged) para entender qué cambió realmente. Si el usuario pasó una descripción como argumento, úsala como contexto adicional, pero el mensaje debe reflejar el diff real, nunca contenido inventado o de otro proyecto.
 
+Si entre los archivos modificados o sin trackear hay algo que podría contener secretos (`.env`, credenciales, dumps de base de datos, llaves, tokens, o cualquier archivo con datos que no deberían subirse), avisa al usuario antes de agregarlo — no asumas que hay que commitearlo solo porque aparece en `git status`.
+
 ## 3. Redactar el mensaje
 
 Usa exactamente esta estructura (omite una sección solo si genuinamente no aplica, ej. "Cómo probarlo" si no hay nada verificable):
@@ -53,9 +55,11 @@ Muestra el mensaje propuesto al usuario y espera confirmación antes de ejecutar
 
 Haz `git add` solo de los archivos relevantes (nunca `git add -A` a ciegas), crea el commit y luego haz **siempre** `git push origin main` a continuación (no esperes una confirmación aparte para el push; ya está autorizado como parte de este flujo).
 
+Nunca uses `--force`, `--no-verify`, ni saltes hooks para lograr que el push pase. Si el push es rechazado (rama divergida), no fuerces nada: investiga primero con `git fetch origin` y `git log` (local vs. `origin/main`) para entender qué cambió del lado remoto, y decide con esa información cómo seguir (por ejemplo, `git pull --rebase` o avisar al usuario si hay un conflicto real).
+
 ## 6. Responder al usuario
 
-Una vez que el push termine, obtén el hash del commit (`git log -1 --format=%H`) y arma la URL: `https://github.com/niiiicoh/sistema-asistencia-integracion/commit/<hash>`. Responde usando exactamente este formato, sin texto adicional antes o después:
+Una vez que el push termine, obtén el hash del commit (`git log -1 --format=%H`) y la URL del remoto con `git remote get-url origin` (no la asumas ni la hardcodees) para armar el link: `<url-del-remoto sin .git>/commit/<hash>`. Responde usando exactamente este formato, sin texto adicional antes o después:
 
 ```
 -----------------------------------------------------------
