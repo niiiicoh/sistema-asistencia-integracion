@@ -251,7 +251,3 @@ npm test ejecuta las pruebas unitarias y HTTP con repositorios en memoria, sin n
     node scripts/verificar-reportes-db.js
 
 Requiere la conexión .env disponible y permiso CREATE TEMPORARY TABLES. Crea únicamente tablas temporales de conexión que ocultan las tablas originales durante la prueba, inserta fixtures allí y las descarta al finalizar. No escribe ni borra registros persistentes. Verifica umbrales, tipos, filtros, nombres históricos, correcciones, ausencia con una sola salida y rangos superiores a 1.000 días. Los 47 tests previos conservan sus archivos y siguen pasando.
-#   s i s t e m a - a s i s t e n c i a - i n t e g r a c i o n  
- #   s i s t e m a - a s i s t e n c i a - i n t e g r a c i o n  
- #   s i s t e m a - a s i s t e n c i a - i n t e g r a c i o n  
- 
