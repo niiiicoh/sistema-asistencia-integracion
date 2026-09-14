@@ -59,7 +59,7 @@ Nunca uses `--force`, `--no-verify`, ni saltes hooks para lograr que el push pas
 
 ## 6. Responder al usuario
 
-Una vez que el push termine, obtén el hash del commit (`git log -1 --format=%H`) y la URL del remoto con `git remote get-url origin` (no la asumas ni la hardcodees) para armar el link: `<url-del-remoto sin .git>/commit/<hash>`. Responde usando exactamente este formato, sin texto adicional antes o después:
+Una vez que el push termine, obtén el hash del commit (`git log -1 --format=%H`) y la URL del remoto con `git remote get-url origin` (no la asumas ni la hardcodees). Si esa URL trae un usuario embebido (`https://usuario@github.com/...`, usado para evitar el selector de cuentas de Git Credential Manager), quítalo antes de mostrarlo — el link final debe verse como `https://github.com/<owner>/<repo>/commit/<hash>`, sin credenciales ni `.git` al final. Responde usando exactamente este formato, sin texto adicional antes o después:
 
 ```
 -----------------------------------------------------------
