@@ -49,6 +49,17 @@ Notas para el reviewer
 
 Muestra el mensaje propuesto al usuario y espera confirmación antes de ejecutar `git commit`, salvo que el usuario ya haya pedido explícitamente "hazlo sin preguntar" en este turno.
 
-## 5. Commitear
+## 5. Commitear y subir
 
-Haz `git add` solo de los archivos relevantes (nunca `git add -A` a ciegas) y crea el commit. No hagas `push` a menos que el usuario lo pida explícitamente aparte.
+Haz `git add` solo de los archivos relevantes (nunca `git add -A` a ciegas), crea el commit y luego haz **siempre** `git push origin main` a continuación (no esperes una confirmación aparte para el push; ya está autorizado como parte de este flujo).
+
+## 6. Responder al usuario
+
+Una vez que el push termine, obtén el hash del commit (`git log -1 --format=%H`) y arma la URL: `https://github.com/niiiicoh/sistema-asistencia-integracion/commit/<hash>`. Responde usando exactamente este formato, sin texto adicional antes o después:
+
+```
+-----------------------------------------------------------
+                     Push Hecho
+            <URL del commit>
+-----------------------------------------------------------
+```
