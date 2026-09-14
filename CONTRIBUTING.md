@@ -68,3 +68,4 @@ Notas para el reviewer
 ## Uso de Claude Code (opcional)
 
 Si usas Claude Code, este repo incluye el skill `/commit` (`.claude/skills/commit/`), que arma el mensaje en este formato a partir de los cambios reales y confirma contigo antes de crear el commit.
+
