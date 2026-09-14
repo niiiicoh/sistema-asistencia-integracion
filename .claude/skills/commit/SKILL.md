@@ -61,7 +61,7 @@ Nunca uses `--force`, `--no-verify`, ni saltes hooks para lograr que el push pas
 
 Una vez que el push termine, obtén el hash del commit (`git log -1 --format=%H`) y la URL del remoto con `git remote get-url origin` (no la asumas ni la hardcodees). Si esa URL trae un usuario embebido (`https://usuario@github.com/...`, usado para evitar el selector de cuentas de Git Credential Manager), quítalo antes de mostrarlo — el link final debe verse como `https://github.com/<owner>/<repo>/commit/<hash>`, sin credenciales ni `.git` al final.
 
-También obtén la lista de archivos incluidos en el commit (`git show --stat --format= HEAD` o `git diff-tree --no-commit-id --name-status -r HEAD`) para listarlos en la segunda caja.
+Para la segunda caja no repitas la lista de archivos con su estado (eso ya lo dice git); resume en 1-3 líneas cortas **qué se hizo**, en lenguaje simple — básicamente la sección "Cambios clave" del mensaje de commit pero condensada, no copiada tal cual.
 
 Responde usando exactamente este formato, sin texto adicional antes o después:
 
@@ -70,8 +70,7 @@ Responde usando exactamente este formato, sin texto adicional antes o después:
                      Push Hecho
             <URL del commit>
 -----------------------------------------------------------
-<archivo o carpeta 1>: <agregado/modificado/eliminado>
-<archivo o carpeta 2>: <agregado/modificado/eliminado>
+<resumen corto de qué se hizo, 1-3 líneas>
 -----------------------------------------------------------
 ```
 
