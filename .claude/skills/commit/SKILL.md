@@ -1,0 +1,54 @@
+---
+name: commit
+description: Crea un commit en este repo con el formato estándar del equipo (Tipo de cambio / Resumen / Cambios clave / Cómo probarlo / Notas para el reviewer), usando siempre la identidad xmartinalarx@gmail.com.
+---
+
+# Commit con formato estándar
+
+Este repositorio usa un formato fijo de mensaje de commit y una identidad de git fija. Al invocar `/commit [descripción opcional]`, sigue estos pasos:
+
+## 1. Identidad
+
+Confirma (no cambies si ya está bien) que la identidad local del repo sea:
+
+```
+git config user.name   # debe ser: Martin Bernabe Alarcon Contreras
+git config user.email  # debe ser: xmartinalarx@gmail.com
+```
+
+Si no coincide, corrígela con `git config user.name` / `git config user.email` (sin `--global`, solo local a este repo).
+
+## 2. Revisar cambios
+
+Ejecuta `git status` y `git diff` (staged y unstaged) para entender qué cambió realmente. Si el usuario pasó una descripción como argumento, úsala como contexto adicional, pero el mensaje debe reflejar el diff real, nunca contenido inventado o de otro proyecto.
+
+## 3. Redactar el mensaje
+
+Usa exactamente esta estructura (omite una sección solo si genuinamente no aplica, ej. "Cómo probarlo" si no hay nada verificable):
+
+```
+<tipo>(<alcance>): <resumen corto en una línea>
+
+Resumen
+<qué cambió y por qué, 2-4 líneas>
+
+Cambios clave
+- <archivo o módulo>: <qué se hizo>
+- <archivo o módulo>: <qué se hizo>
+
+Cómo probarlo
+- <pasos o verificación concreta>
+
+Notas para el reviewer
+- <aclaraciones, decisiones no obvias, o "Ninguna">
+```
+
+`<tipo>` sigue Conventional Commits (`fix`, `feat`, `refactor`, `docs`, `chore`, `test`). `<alcance>` es el módulo o área tocada (ej. `readme`, `auth`, `reportes`).
+
+## 4. Confirmar antes de commitear
+
+Muestra el mensaje propuesto al usuario y espera confirmación antes de ejecutar `git commit`, salvo que el usuario ya haya pedido explícitamente "hazlo sin preguntar" en este turno.
+
+## 5. Commitear
+
+Haz `git add` solo de los archivos relevantes (nunca `git add -A` a ciegas) y crea el commit. No hagas `push` a menos que el usuario lo pida explícitamente aparte.
