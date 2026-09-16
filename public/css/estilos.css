@@ -103,8 +103,6 @@ td button { font-size: .8rem; min-height: 36px; padding: 7px 12px; }
 .login-brand { background: var(--navy); color: white; padding: 48px clamp(30px, 5vw, 88px); display: flex; flex-direction: column; min-height: 100vh; }
 .login-intro { margin: auto 0; padding: 75px 0; }
 .login-intro h2 { font-size: clamp(2.3rem, 4vw, 3.7rem); line-height: 1.12; font-weight: 500; letter-spacing: -.045em; margin-bottom: 30px; }
-.login-intro p { color: #cfdee6; max-width: 32ch; line-height: 1.8; }
-.login-purpose { margin-top: 42px; border-top: 1px solid #ffffff35; padding-top: 22px; font-size: .875rem; color: #d7e5ec; }
 .login-footer { margin: 0; color: #b9d0dc; font-size: .8rem; }
 .login-main { display: grid; align-items: center; padding: 56px clamp(28px, 7vw, 120px); }
 .login-content { width: 100%; max-width: 420px; margin: auto; }
