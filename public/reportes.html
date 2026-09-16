@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reportes · Asistencia</title><link rel="stylesheet" href="/css/estilos.css"><script src="/js/comun.js" defer></script><script src="/js/sesion.js" defer></script><script src="/js/reportes.js" defer></script></head>
+<body>
+<header><a href="/">Asistencia</a><nav aria-label="Principal"><a href="/" data-admin hidden>Inicio</a><a href="/usuarios.html" data-admin hidden>Usuarios</a><a href="/asistencia.html">Asistencia</a><a href="/reportes.html" data-admin hidden aria-current="page">Reportes</a><span id="identidad" class="help" style="color:white"></span><button id="cerrar-sesion" class="secondary">Cerrar sesión</button></nav></header>
+<main><h1>Reportes</h1><p class="intro">Consulta atrasos, salidas anticipadas e inasistencias por fecha.</p>
+<div id="mensaje" class="message" role="status" aria-live="polite" hidden></div>
+<form id="filtros-reportes" class="panel"><div class="fields">
+<label>Reporte<select id="tipo-reporte"><option value="atrasos">Atrasos</option><option value="salidas-anticipadas">Salidas anticipadas</option><option value="inasistencias">Inasistencias</option></select></label>
+<label>Empleado (opcional)<select id="empleado" disabled><option value="">Cargando empleados…</option></select></label>
+<label>Fecha desde<input type="date" id="desde" min="1000-01-01" max="9999-12-31" required></label>
+<label>Fecha hasta<input type="date" id="hasta" min="1000-01-01" max="9999-12-31" required></label>
+</div><p id="regla-reporte" class="help">Entradas posteriores a las 09:30:00. Las entradas a las 09:30:00 exactas no son atrasos.</p>
+<button id="generar" disabled>Generar reporte</button></form>
+<div class="heading"><h2 id="titulo-resultados">Atrasos</h2><span id="contador" role="status" aria-live="polite">Sin consulta</span></div>
+<div class="table-wrap"><table><thead><tr><th scope="col">ID usuario</th><th scope="col">Nombre</th><th scope="col">Apellido</th><th scope="col">Correo</th><th scope="col">Fecha</th><th scope="col" id="columna-hora">Hora de entrada</th></tr></thead><tbody id="resultados"><tr><td class="empty" colspan="6">Selecciona las fechas y genera un reporte.</td></tr></tbody></table></div>
+</main><footer>Integración de Competencias II · Avance 4</footer></body></html>
