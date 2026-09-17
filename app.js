@@ -6,6 +6,7 @@ const AppError = require('./src/utils/AppError');
 function createApp({ usuarioService, asistenciaService, authService, reporteService }) {
   const app = express();
   app.disable('x-powered-by');
+  if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
   app.use(express.json({ limit: '16kb' }));
   const { token, admin } = require('./src/middleware/auth');
   const intentos = new Map();
@@ -69,7 +70,8 @@ if (require.main === module) {
     asistenciaService: new (require('./src/services/AsistenciaService'))(registros, usuarios)
   });
   const port = Number(process.env.PORT || 3000);
-  const server = app.listen(port, '127.0.0.1', () => console.log(`Sistema de asistencia: http://localhost:${port}`));
+  const host = process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
+  const server = app.listen(port, host, () => console.log(`Sistema de asistencia: http://${host}:${port}`));
   server.on('error', () => { console.error('No se pudo iniciar el servidor. Revise el puerto configurado.'); process.exit(1); });
   db.query('SELECT 1').then(() => console.log('Conexión MySQL verificada.')).catch(() => console.error('MySQL no disponible. Configure .env e importe database/schema.sql para operar.'));
   const cerrar = () => server.close(() => db.end().then(() => process.exit(0)));
