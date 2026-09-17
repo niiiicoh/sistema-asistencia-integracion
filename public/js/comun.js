@@ -13,7 +13,7 @@ function mensaje(texto, error = false) {
 }
 function celda(row, text) { const td = document.createElement('td'); td.textContent = text; row.append(td); return td; }
 function tablaVacia(body, texto) { body.replaceChildren(); const row = body.insertRow(); const td = celda(row, texto); td.colSpan = body.closest('table').querySelectorAll('thead th').length; td.className = 'empty'; }
-function dibujarBarras(svg, datos, { etiqueta = clave => clave, titulo = (etq, valor) => `${etq}: ${valor}` } = {}) {
+function dibujarBarras(svg, datos, { etiqueta = clave => clave, titulo = (etq, valor) => `${etq}: ${valor}`, alClic } = {}) {
   if (!datos.length) { svg.innerHTML = ''; return; }
   const ancho = 400, base = 62, altoMax = 40, gap = 12, alto = 84;
   const anchoBarra = Math.min(40, (ancho - gap * (datos.length + 1)) / datos.length);
@@ -30,4 +30,32 @@ function dibujarBarras(svg, datos, { etiqueta = clave => clave, titulo = (etq, v
   }).join('');
   svg.innerHTML = `<line class="chart-base" x1="0" y1="${base}" x2="${ancho}" y2="${base}"/>${barras}`;
   requestAnimationFrame(() => requestAnimationFrame(() => { svg.querySelectorAll('.chart-barra').forEach(barra => barra.classList.add('crecer')); }));
+  if (alClic) svg.querySelectorAll('.chart-barra').forEach((rect, i) => {
+    rect.style.cursor = 'pointer';
+    rect.addEventListener('click', () => alClic(datos[i][0], datos[i][1], rect));
+  });
+}
+let popoverGraficoActual = null;
+function cerrarPopoverGrafico() {
+  if (!popoverGraficoActual) return;
+  popoverGraficoActual.remove(); popoverGraficoActual = null;
+  document.removeEventListener('click', cerrarPopoverAlClicFuera, true);
+  document.removeEventListener('keydown', cerrarPopoverConEscape, true);
+}
+function cerrarPopoverAlClicFuera(evento) { if (popoverGraficoActual && !popoverGraficoActual.contains(evento.target)) cerrarPopoverGrafico(); }
+function cerrarPopoverConEscape(evento) { if (evento.key === 'Escape') cerrarPopoverGrafico(); }
+function mostrarPopoverGrafico(ancla, titulo, items) {
+  cerrarPopoverGrafico();
+  const pop = document.createElement('div'); pop.className = 'chart-popover'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', titulo);
+  pop.innerHTML = `<button type="button" class="chart-popover-cerrar" aria-label="Cerrar">×</button><strong>${titulo}</strong>${items.length ? `<ul>${items.map(texto => `<li>${texto}</li>`).join('')}</ul>` : '<p>Nadie en esta categoría.</p>'}`;
+  document.body.append(pop);
+  const rectAncla = ancla.getBoundingClientRect(); const rectPop = pop.getBoundingClientRect();
+  let left = rectAncla.left + rectAncla.width / 2 - rectPop.width / 2 + window.scrollX;
+  left = Math.max(8 + window.scrollX, Math.min(left, window.scrollX + document.documentElement.clientWidth - rectPop.width - 8));
+  let top = rectAncla.top - rectPop.height - 10 + window.scrollY;
+  if (top < window.scrollY + 8) top = rectAncla.bottom + 10 + window.scrollY;
+  pop.style.left = `${left}px`; pop.style.top = `${top}px`;
+  pop.querySelector('.chart-popover-cerrar').onclick = cerrarPopoverGrafico;
+  popoverGraficoActual = pop;
+  setTimeout(() => { document.addEventListener('click', cerrarPopoverAlClicFuera, true); document.addEventListener('keydown', cerrarPopoverConEscape, true); });
 }

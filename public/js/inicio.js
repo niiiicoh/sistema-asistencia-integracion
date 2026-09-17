@@ -25,7 +25,14 @@ function dibujarGraficoSemana(registros) {
   const datos = dias.map(f => [f, registros.filter(r => r.fecha === f).length]);
   dibujarBarras(document.getElementById('grafico-semana'), datos, {
     etiqueta: f => new Date(`${f}T00:00:00`).toLocaleDateString('es-CL', { weekday: 'short' }).replace('.', ''),
-    titulo: (etq, valor) => `${etq}: ${valor} marcaciones`
+    titulo: (etq, valor) => `${etq}: ${valor} marcaciones`,
+    alClic: (fecha, valor, rect) => {
+      const personas = registros.filter(r => r.fecha === fecha)
+        .sort((a, b) => a.hora.localeCompare(b.hora))
+        .map(r => `${r.usuario} · ${r.tipoRegistro === 'ENTRADA' ? 'Entrada' : 'Salida'} ${r.hora}`);
+      const fechaBonita = new Date(`${fecha}T00:00:00`).toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+      mostrarPopoverGrafico(rect, `${fechaBonita.charAt(0).toUpperCase()}${fechaBonita.slice(1)} (${valor})`, personas);
+    }
   });
 }
 function dibujarGraficoPuntualidad(registros) {

@@ -31,10 +31,20 @@ function agruparPorEmpleado(filas) {
   }
   return [...mapa.values()].sort((a, b) => b.total - a.total);
 }
-function dibujarGraficoDia(datos) {
+function dibujarGraficoDia(filas) {
+  const datos = agruparPorDia(filas);
+  const [, , , etiquetaMin] = opciones[tipo.value];
   dibujarBarras(document.getElementById('grafico-dia'), datos, {
     etiqueta: fecha => fecha.split('-').slice(1).reverse().join('/'),
-    titulo: (etq, valor) => `${etq}: ${valor}`
+    titulo: (etq, valor) => `${etq}: ${valor}`,
+    alClic: (fecha, valor, rect) => {
+      const personas = filas.filter(f => f.fecha === fecha).map(f => {
+        const nombre = `${f.nombre ?? 'Pendiente'} ${f.apellido ?? 'Pendiente'}`;
+        return f.hora ? `${nombre} · ${f.hora}` : nombre;
+      });
+      const fechaBonita = fecha.split('-').reverse().join('/');
+      mostrarPopoverGrafico(rect, `${etiquetaMin.charAt(0).toUpperCase()}${etiquetaMin.slice(1)} del ${fechaBonita} (${valor})`, personas);
+    }
   });
 }
 function dibujarGraficoEmpleado(datos) {
@@ -81,7 +91,7 @@ formulario.onsubmit = async event => {
     const rango = `del ${desde.value.split('-').reverse().join('/')} al ${hasta.value.split('-').reverse().join('/')}`;
     document.getElementById('subtitulo-dia').textContent = `Cada barra es la cantidad de ${etiquetaMin} de ese día, ${rango}.`;
     document.getElementById('subtitulo-empleado').textContent = `Cantidad de ${etiquetaMin} por empleado, ${rango}.`;
-    dibujarGraficoDia(agruparPorDia(filas));
+    dibujarGraficoDia(filas);
     dibujarGraficoEmpleado(agruparPorEmpleado(filas));
   } catch (error) { mensaje(error.message, true); contador.textContent = 'Consulta no completada'; vaciar('No se pudo generar el reporte.'); }
   finally { controles.forEach(c => { c.disabled = false; }); }
