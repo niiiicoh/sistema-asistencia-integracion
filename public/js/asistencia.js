@@ -69,6 +69,8 @@ document.getElementById('form-registro').onsubmit = async event => {
 entrada.onclick = () => registrar('entrada'); salida.onclick = () => registrar('salida');
 window.sesionLista.then(usuario => {
   if (!usuario) return; usuarioActual = usuario;
-  document.getElementById('titulo-registros').textContent = usuario.rol === 'ADMINISTRADOR' ? 'Marcaciones de todos los usuarios' : 'Mis marcaciones';
+  const esAdmin = usuario.rol === 'ADMINISTRADOR';
+  document.getElementById('titulo-registros').textContent = esAdmin ? 'Marcaciones de todos los usuarios' : 'Mis marcaciones';
+  document.getElementById('titulo-pagina').textContent = esAdmin ? 'Control de asistencia' : `¡Hola, ${usuario.nombre || usuario.correo}!`;
   cargarRegistros();
 });
