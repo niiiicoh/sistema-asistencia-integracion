@@ -76,6 +76,11 @@ test('configuración de IP permitida es exclusiva de administrador', async()=>{
  await empleado.get('/api/configuracion/ip-permitida').expect(403);
  await empleado.put('/api/configuracion/ip-permitida').send({ip:'1.2.3.4'}).expect(403);
 });
+test('página red.html también está protegida', async()=>{
+ await admin.get('/red.html').expect(200);
+ await empleado.get('/red.html').expect(403);
+ await request(f.app).get('/red.html').expect(302).expect('Location','/login.html');
+});
 test('admin consulta y guarda la IP permitida', async()=>{
  const inicial=await admin.get('/api/configuracion/ip-permitida').expect(200);
  expect(inicial.body.ip).toBeNull();

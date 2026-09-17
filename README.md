@@ -31,6 +31,8 @@ asistencia-web/
 │   ├── usuarios.html
 │   ├── reportes.html
 │   ├── asistencia.html
+│   ├── historial.html
+│   ├── red.html
 │   ├── css/estilos.css
 │   └── js/
 │       ├── login.js
@@ -232,7 +234,7 @@ La restricción de red para marcar asistencia es opcional (por defecto no hay ni
 
 ## Pruebas
 
-Las pruebas Jest usan repositorios simulados y no necesitan MySQL. Cubren usuarios, generación de correos, autenticación, cierre de sesión, permisos, privacidad de marcaciones, alternancia, edición/eliminación administrativa, validaciones, manejo de errores y la restricción de red para marcar asistencia. El conjunto tiene 103 pruebas en 6 suites. La concurrencia se verificó adicionalmente contra MariaDB real. Consulta VERIFICACION.md.
+Las pruebas Jest usan repositorios simulados y no necesitan MySQL. Cubren usuarios, generación de correos, autenticación, cierre de sesión, permisos, privacidad de marcaciones, alternancia, edición/eliminación administrativa, validaciones, manejo de errores y la restricción de red para marcar asistencia. El conjunto tiene 104 pruebas en 6 suites. La concurrencia se verificó adicionalmente contra MariaDB real. Consulta VERIFICACION.md.
 
 ## Ampliación: nombre y apellido
 
@@ -290,7 +292,7 @@ Diseño:
 - La IP del solicitante se toma de `req.ip` y se normaliza (`src/utils/normalizarIp.js`) para aceptar tanto `181.42.190.187` como su notación IPv4-mapped `::ffff:181.42.190.187`. En producción, `req.ip` solo refleja la IP real del cliente (y no la del proxy de Hostinger) porque `trust proxy` está habilitado bajo `NODE_ENV=production`.
 - Un empleado conectado desde una red distinta a la configurada recibe 403 con un mensaje explicativo al intentar marcar.
 
-Panel de administración: en Control de asistencia, la sección "Restricción de red para marcar" (visible solo para administradores) permite ver la IP configurada, escribir una nueva, limpiarla, o completarla automáticamente con el botón "Usar mi IP actual" (toma la IP con la que el propio administrador está navegando en ese momento). Como una IP pública residencial u office puede cambiar con el tiempo, este botón evita depender de recordar o buscar la IP manualmente cada vez que cambia.
+Panel de administración: la sección "Red" del menú (visible solo para administradores, página `red.html`) permite ver la IP configurada, escribir una nueva, limpiarla, o completarla automáticamente con el botón "Usar mi IP actual" (toma la IP con la que el propio administrador está navegando en ese momento). Como una IP pública residencial u office puede cambiar con el tiempo, este botón evita depender de recordar o buscar la IP manualmente cada vez que cambia. Al igual que Reportes, la página está protegida en el servidor: anónimo recibe 302 a login y empleado recibe 403.
 
 Endpoints (ambos exclusivos de administrador, devuelven 403 a empleados):
 

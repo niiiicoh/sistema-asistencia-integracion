@@ -41,7 +41,7 @@ function createApp({ usuarioService, asistenciaService, authService, reporteServ
   app.use('/api/asistencia', require('./src/routes/asistenciaRoutes')(asistenciaService));
   app.use('/api/reportes', require('./src/routes/reporteRoutes')(reporteService));
   app.use('/api/configuracion', admin, require('./src/routes/configuracionRoutes')(configuracionService));
-  app.get('/reportes.html', (req, res, next) => {
+  app.get(['/reportes.html', '/red.html'], (req, res, next) => {
     if (!req.usuario) return res.redirect('/login.html');
     next();
   }, admin);
