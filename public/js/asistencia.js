@@ -66,6 +66,8 @@ function pintarResumenSemana(propias) {
   animarConteo(document.getElementById('stat-dias'), dias.size);
   animarConteo(document.getElementById('stat-horas'), Math.round(minutos / 60));
   dibujarGraficoSemana(document.getElementById('grafico-semana-empleado'), propias);
+  animarTexto(document.querySelector('.stats'));
+  animarTexto(document.getElementById('grafico-semana-empleado').closest('.panel'));
 }
 async function registrar(tipo) {
   entrada.disabled = salida.disabled = true;
