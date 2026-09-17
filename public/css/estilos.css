@@ -176,6 +176,12 @@ body.vista-empleado tr.day-row:hover td { background: #f2f4f6; }
 .chart-popover-cerrar { position: absolute; top: 8px; right: 8px; min-height: auto; background: none; border: none; color: var(--muted); font-size: 1.15rem; line-height: 1; padding: 5px; }
 .chart-popover-cerrar:hover:not(:disabled) { filter: none; color: var(--ink); background: none; }
 
+.confirm-backdrop { position: fixed; inset: 0; z-index: 40; background: rgba(20, 36, 56, .45); display: grid; place-items: center; padding: 20px; animation: confirm-fondo .15s ease-out; }
+@keyframes confirm-fondo { from { opacity: 0; } to { opacity: 1; } }
+.confirm-dialog { background: var(--surface); border-radius: var(--radius); padding: 26px 26px 20px; max-width: 380px; width: 100%; box-shadow: 0 20px 48px rgba(20, 36, 56, .28); animation: popover-entrada .18s ease-out; }
+.confirm-dialog p { margin: 0 0 22px; color: var(--ink); line-height: 1.55; }
+.confirm-dialog .actions { justify-content: flex-end; }
+
 #grafico-puntualidad .proporcion { display: flex; height: 28px; border-radius: 20px; overflow: hidden; background: #eef0f2; }
 #grafico-puntualidad .segmento { display: block; height: 100%; transition: width 1s cubic-bezier(.22, .82, .24, 1), filter .15s ease; }
 #grafico-puntualidad .segmento:hover { filter: brightness(1.15); }

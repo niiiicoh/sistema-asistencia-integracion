@@ -41,7 +41,7 @@ async function cargarRegistros() {
         };
         const eliminar = document.createElement('button'); eliminar.textContent = 'Eliminar'; eliminar.className = 'danger';
         eliminar.onclick = async () => {
-          if (!confirm(`¿Eliminar ${registro.tipoRegistro} de ${registro.usuario} del ${registro.fecha} a las ${registro.hora}?`)) return;
+          if (!await confirmar(`¿Eliminar ${registro.tipoRegistro} de ${registro.usuario} del ${registro.fecha} a las ${registro.hora}?`)) return;
           eliminar.disabled = true;
           try { await api(`/api/asistencia/${registro.idRegistro}`, { method: 'DELETE' }); mostrarPanel(editorRegistro, false); mensaje('Registro eliminado.'); await cargarRegistros(); }
           catch (error) { mensaje(error.message, true); eliminar.disabled = false; }

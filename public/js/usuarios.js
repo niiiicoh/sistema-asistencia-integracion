@@ -28,7 +28,7 @@ async function cargar() {
     const edit = document.createElement('button'); edit.textContent = 'Editar'; edit.className = 'secondary'; edit.setAttribute('aria-label', `Editar ${usuario.correo}`); edit.onclick = () => abrir(usuario);
     const del = document.createElement('button'); del.textContent = 'Eliminar'; del.className = 'danger'; del.setAttribute('aria-label', `Eliminar ${usuario.correo}`);
     del.onclick = async () => {
-      if (!confirm(`¿Eliminar al usuario ${usuario.correo}?`)) return;
+      if (!await confirmar(`¿Eliminar al usuario ${usuario.correo}?`)) return;
       del.disabled = true;
       try { await api(`/api/usuarios/${usuario.idUsuario}`, { method: 'DELETE' }); if (editando === usuario.idUsuario) { mostrarPanel(editor, false); editando = null; } mensaje('Usuario eliminado correctamente.'); await refrescar(); }
       catch (error) { mensaje(error.message, true); }

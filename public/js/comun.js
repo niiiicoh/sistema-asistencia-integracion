@@ -58,6 +58,25 @@ function dibujarBarras(svg, datos, { etiqueta = clave => clave, titulo = (etq, v
     rect.addEventListener('click', () => alClic(datos[i][0], datos[i][1], rect));
   });
 }
+function confirmar(texto, { textoConfirmar = 'Eliminar' } = {}) {
+  return new Promise(resolver => {
+    const fondo = document.createElement('div'); fondo.className = 'confirm-backdrop';
+    const caja = document.createElement('div'); caja.className = 'confirm-dialog'; caja.setAttribute('role', 'alertdialog'); caja.setAttribute('aria-modal', 'true');
+    caja.innerHTML = `<p>${texto}</p><div class="actions"><button type="button" class="secondary" data-accion="cancelar">Cancelar</button><button type="button" class="danger" data-accion="confirmar">${textoConfirmar}</button></div>`;
+    fondo.append(caja); document.body.append(fondo);
+    const cerrar = resultado => {
+      fondo.remove();
+      document.removeEventListener('keydown', alEscape);
+      resolver(resultado);
+    };
+    const alEscape = evento => { if (evento.key === 'Escape') cerrar(false); };
+    fondo.addEventListener('click', evento => { if (evento.target === fondo) cerrar(false); });
+    caja.querySelector('[data-accion="cancelar"]').onclick = () => cerrar(false);
+    caja.querySelector('[data-accion="confirmar"]').onclick = () => cerrar(true);
+    document.addEventListener('keydown', alEscape);
+    caja.querySelector('[data-accion="cancelar"]').focus();
+  });
+}
 let popoverGraficoActual = null;
 function cerrarPopoverGrafico() {
   if (!popoverGraficoActual) return;
