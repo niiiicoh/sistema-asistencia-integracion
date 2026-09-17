@@ -115,7 +115,7 @@ body.vista-empleado #estado-marca { font-size: 1.05rem; max-width: 46ch; }
 body.vista-empleado .register .actions { width: 100%; max-width: 320px; }
 body.vista-empleado .register button { width: 100%; min-height: 56px; font-size: 1rem; }
 body.vista-empleado .register button:disabled { display: none; }
-body.vista-empleado #tabla-marcaciones th:first-child, body.vista-empleado #tabla-marcaciones td:first-child { display: none; }
+body.vista-empleado #tabla-marcaciones th:first-child, body.vista-empleado #tabla-marcaciones tbody tr:not(.day-row) td:first-child { display: none; }
 body.vista-empleado #titulo-registros { margin-top: 44px; }
 body.vista-empleado tr.day-row td { background: #f2f4f6; color: var(--muted); font-weight: 600; font-size: .82rem; padding: 10px 20px; border-bottom: 1px solid var(--line); }
 body.vista-empleado tr.day-row:hover td { background: #f2f4f6; }
