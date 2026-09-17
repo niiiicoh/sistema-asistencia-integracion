@@ -54,6 +54,7 @@ function createApp({ usuarioService, asistenciaService, authService, reporteServ
     if (error.type === 'entity.parse.failed') return res.status(400).json({ mensaje: 'El cuerpo JSON no es válido.' });
     if (error.type === 'entity.too.large') return res.status(400).json({ mensaje: 'La solicitud es demasiado grande.' });
     const status = error instanceof AppError ? error.status : 500;
+    if (status === 500) console.error(error);
     res.status(status).json({ mensaje: status === 500 ? 'No se pudo completar la operación. Revise la conexión con la base de datos.' : error.message });
   });
   return app;
@@ -73,7 +74,7 @@ if (process.env.NODE_ENV !== 'test') {
   const host = process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
   const server = app.listen(port, host, () => console.log(`Sistema de asistencia: http://${host}:${port}`));
   server.on('error', () => { console.error('No se pudo iniciar el servidor. Revise el puerto configurado.'); process.exit(1); });
-  db.query('SELECT 1').then(() => console.log('Conexión MySQL verificada.')).catch(() => console.error('MySQL no disponible. Configure .env e importe database/schema.sql para operar.'));
+  db.query('SELECT 1').then(() => console.log('Conexión MySQL verificada.')).catch(err => console.error('MySQL no disponible. Configure .env e importe database/schema.sql para operar.', err));
   const cerrar = () => server.close(() => db.end().then(() => process.exit(0)));
   process.on('SIGINT', cerrar);
   process.on('SIGTERM', cerrar);
