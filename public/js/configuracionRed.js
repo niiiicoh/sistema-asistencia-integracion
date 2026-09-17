@@ -11,7 +11,15 @@ window.sesionLista.then(async usuario => {
     ipActualDetectada = datos.ipActual || '';
     estado.textContent = describir(datos.ip);
   } catch (error) { estado.textContent = 'No se pudo cargar la configuración.'; mensaje(error.message, true); }
-  document.getElementById('usar-ip-actual').onclick = () => { input.value = ipActualDetectada; input.focus(); };
+  const botonIpActual = document.getElementById('usar-ip-actual');
+  botonIpActual.onclick = async () => {
+    botonIpActual.disabled = true;
+    try {
+      const respuesta = await fetch('https://ipv4.icanhazip.com');
+      input.value = (await respuesta.text()).trim();
+    } catch { input.value = ipActualDetectada; }
+    finally { botonIpActual.disabled = false; input.focus(); }
+  };
   boton.onclick = async () => {
     boton.disabled = true;
     try {
