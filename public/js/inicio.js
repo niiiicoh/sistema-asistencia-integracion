@@ -8,15 +8,65 @@ function animarReloj() {
     if (minuto) minuto.style.transform = `rotate(${gradosMinuto}deg)`;
   }));
 }
+function animarConteo(elemento, valorFinal) {
+  elemento.dataset.valor = valorFinal;
+  const duracion = 900; const inicio = performance.now();
+  requestAnimationFrame(function paso(ahora) {
+    const avance = Math.min(1, (ahora - inicio) / duracion);
+    const suavizado = 1 - Math.pow(1 - avance, 3);
+    elemento.textContent = Math.round(valorFinal * suavizado);
+    if (avance < 1) requestAnimationFrame(paso);
+  });
+}
+function dibujarGraficoSemana(registros) {
+  const dias = [];
+  const hoy = new Date();
+  for (let i = 6; i >= 0; i--) { const d = new Date(hoy); d.setDate(d.getDate() - i); dias.push(d.toISOString().slice(0, 10)); }
+  const conteos = dias.map(f => registros.filter(r => r.fecha === f).length);
+  const max = Math.max(1, ...conteos);
+  const ancho = 340, alto = 150, base = 122, altoMax = 88, gap = 12;
+  const anchoBarra = (ancho - gap * (dias.length + 1)) / dias.length;
+  const svg = document.getElementById('grafico-semana');
+  svg.innerHTML = dias.map((f, i) => {
+    const x = gap + i * (anchoBarra + gap);
+    const h = Math.round(conteos[i] / max * altoMax);
+    const etiqueta = new Date(`${f}T00:00:00`).toLocaleDateString('es-CL', { weekday: 'short' }).replace('.', '');
+    return `<text class="chart-valor" x="${x + anchoBarra / 2}" y="${base - h - 8}" text-anchor="middle">${conteos[i]}</text>
+      <rect class="chart-barra" x="${x}" y="${base - h}" width="${anchoBarra}" height="${h}"><title>${etiqueta}: ${conteos[i]} marcaciones</title></rect>
+      <text class="chart-etiqueta" x="${x + anchoBarra / 2}" y="${base + 18}" text-anchor="middle">${etiqueta}</text>`;
+  }).join('');
+  requestAnimationFrame(() => requestAnimationFrame(() => { svg.querySelectorAll('.chart-barra').forEach(barra => barra.classList.add('crecer')); }));
+}
+function dibujarGraficoPuntualidad(registros) {
+  const hoy = new Date().toISOString().slice(0, 10);
+  const entradasHoy = registros.filter(r => r.fecha === hoy && r.tipoRegistro === 'ENTRADA');
+  const contenedor = document.getElementById('grafico-puntualidad');
+  if (!entradasHoy.length) return;
+  const aTiempo = entradasHoy.filter(r => r.hora <= '09:30:00').length;
+  const atrasados = entradasHoy.length - aTiempo;
+  const pct = n => Math.round(n / entradasHoy.length * 100);
+  contenedor.innerHTML = `
+    <div class="proporcion"><span class="segmento bien" style="width:0%"></span><span class="segmento atraso" style="width:0%"></span></div>
+    <ul class="leyenda-proporcion">
+      <li><span class="punto bien"></span>A tiempo <strong>${aTiempo}</strong> (${pct(aTiempo)}%)</li>
+      <li><span class="punto atraso"></span>Atrasados <strong>${atrasados}</strong> (${pct(atrasados)}%)</li>
+    </ul>`;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    contenedor.querySelector('.bien').style.width = `${pct(aTiempo)}%`;
+    contenedor.querySelector('.atraso').style.width = `${pct(atrasados)}%`;
+  }));
+}
 async function cargarResumen() {
   try {
     const [usuarios, registros] = await Promise.all([api('/api/usuarios'), api('/api/asistencia')]);
     const hoy = new Date().toISOString().slice(0, 10);
-    document.getElementById('stat-empleados').textContent = usuarios.filter(u => u.rol === 'EMPLEADO').length;
+    animarConteo(document.getElementById('stat-empleados'), usuarios.filter(u => u.rol === 'EMPLEADO').length);
     const deHoy = registros.filter(r => r.fecha === hoy);
-    document.getElementById('stat-marcaciones').textContent = deHoy.length;
-    document.getElementById('stat-atrasos').textContent = deHoy.filter(r => r.tipoRegistro === 'ENTRADA' && r.hora > '09:30:00').length;
-  } catch { /* Si falla, las tarjetas quedan con el guion inicial. */ }
+    animarConteo(document.getElementById('stat-marcaciones'), deHoy.length);
+    animarConteo(document.getElementById('stat-atrasos'), deHoy.filter(r => r.tipoRegistro === 'ENTRADA' && r.hora > '09:30:00').length);
+    dibujarGraficoSemana(registros);
+    dibujarGraficoPuntualidad(registros);
+  } catch { /* Si falla, las tarjetas y graficos quedan con sus valores iniciales. */ }
 }
 animarReloj();
 window.sesionLista.then(usuario => {

@@ -9,6 +9,7 @@
   --cover: #142438;
   --gold: #a17f28;
   --wine: #7a2436;
+  --status-bien: #2f6b4f;
   --line: #d8dde2;
   --surface: #fff;
   --radius: 3px;
@@ -135,6 +136,25 @@ body.vista-empleado tr.day-row:hover td { background: #f2f4f6; }
 .stat strong { display: block; font-family: var(--display); font-size: 2.1rem; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
 .stat span { display: block; margin-top: 6px; color: var(--muted); font-size: .875rem; }
 
+.charts-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-bottom: 36px; }
+.chart-card h2 { margin-bottom: 18px; }
+.chart-bars { width: 100%; height: auto; overflow: visible; }
+.chart-barra { fill: var(--gold); transform-box: fill-box; transform-origin: bottom; transform: scaleY(0); transition: transform 1s cubic-bezier(.22, .82, .24, 1); }
+.chart-barra.crecer { transform: scaleY(1); }
+.chart-valor { font-family: var(--mono); font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+.chart-etiqueta { font-family: "Segoe UI", Arial, sans-serif; font-size: 11px; fill: var(--muted); }
+
+#grafico-puntualidad .proporcion { display: flex; height: 28px; border-radius: 20px; overflow: hidden; background: #eef0f2; }
+#grafico-puntualidad .segmento { display: block; height: 100%; transition: width 1s cubic-bezier(.22, .82, .24, 1); }
+#grafico-puntualidad .segmento.bien { background: var(--status-bien); }
+#grafico-puntualidad .segmento.atraso { background: var(--wine); }
+.leyenda-proporcion { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: .9rem; color: var(--muted); }
+.leyenda-proporcion li { display: flex; align-items: center; gap: 9px; }
+.leyenda-proporcion strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+.leyenda-proporcion .punto { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.leyenda-proporcion .punto.bien { background: var(--status-bien); }
+.leyenda-proporcion .punto.atraso { background: var(--wine); }
+
 .cards { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--line); border-radius: var(--radius); background: white; overflow: hidden; margin-top: 40px; }
 .card { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; column-gap: 24px; align-items: center; padding: 30px; text-decoration: none; color: var(--ink); border-bottom: 1px solid var(--line); }
 .card:last-child { border-bottom: 0; }
@@ -162,7 +182,7 @@ body.vista-empleado tr.day-row:hover td { background: #f2f4f6; }
 
 @media (min-width: 1400px) { #filtros-reportes .fields { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 1100px) { .register { align-items: flex-start; flex-direction: column; } .card { grid-template-columns: 48px minmax(0, 1fr); } .card strong { grid-column: 2; grid-row: 3; margin-top: 16px; } }
-@media (max-width: 640px) { .home-hero { flex-direction: column; align-items: flex-start; } .inicio-clock { width: 84px; height: 84px; } .stats { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .home-hero { flex-direction: column; align-items: flex-start; } .inicio-clock { width: 84px; height: 84px; } .stats { grid-template-columns: 1fr; } .charts-row { grid-template-columns: 1fr; } }
 @media (max-width: 800px) {
   .sidebar { position: static; width: 100%; padding: 20px; }
   .sidebar nav { margin-top: 22px; flex-direction: row; flex-wrap: wrap; gap: 6px; overflow: visible; }
