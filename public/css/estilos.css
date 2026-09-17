@@ -58,6 +58,9 @@ button, .button { display: inline-flex; align-items: center; justify-content: ce
 button:hover:not(:disabled) { filter: brightness(1.25); }
 button:active:not(:disabled) { transform: translateY(1px); }
 button:disabled { opacity: .5; cursor: not-allowed; }
+@keyframes girar { to { transform: rotate(360deg); } }
+button.cargando { color: transparent !important; opacity: 1; position: relative; }
+button.cargando::after { content: ''; position: absolute; top: 50%; left: 50%; width: 17px; height: 17px; margin: -9px 0 0 -9px; border: 2px solid rgba(255, 255, 255, .35); border-top-color: #fff; border-radius: 50%; animation: girar .7s linear infinite; }
 .secondary { color: var(--ink); background: white; border-color: #c9d0d8; }
 .danger { color: #6e1c2c; background: #fbf1f2; border-color: #e6c3cb; }
 .entrada { background: var(--cover); }

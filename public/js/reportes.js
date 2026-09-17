@@ -94,6 +94,7 @@ formulario.onsubmit = async event => {
   const params = new URLSearchParams({ desde: desde.value, hasta: hasta.value });
   if (empleado.value) params.set('idUsuario', empleado.value);
   const controles = [...formulario.elements]; controles.forEach(c => { c.disabled = true; });
+  generar.classList.add('cargando');
   document.getElementById('mensaje').hidden = true;
   contador.textContent = 'Consultando…'; vaciar('Consultando registros…');
   try {
@@ -117,7 +118,7 @@ formulario.onsubmit = async event => {
     descargar.hidden = false;
     descargar.onclick = () => descargarReporteWord(seleccion, filas);
   } catch (error) { mensaje(error.message, true); contador.textContent = 'Consulta no completada'; vaciar('No se pudo generar el reporte.'); }
-  finally { controles.forEach(c => { c.disabled = false; }); }
+  finally { controles.forEach(c => { c.disabled = false; }); generar.classList.remove('cargando'); }
 };
 window.sesionLista.then(async usuario => {
   if (!usuario || usuario.rol !== 'ADMINISTRADOR') return;
