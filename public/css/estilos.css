@@ -155,6 +155,15 @@ body.vista-empleado tr.day-row:hover td { background: #f2f4f6; }
 .leyenda-proporcion .punto.bien { background: var(--status-bien); }
 .leyenda-proporcion .punto.atraso { background: var(--wine); }
 
+.ranking { max-height: 260px; overflow-y: auto; }
+.ranking:empty::after { content: 'Sin datos para graficar.'; color: var(--muted); font-size: .9rem; }
+.fila-ranking { display: grid; grid-template-columns: minmax(0, 1fr) 2fr auto; align-items: center; gap: 14px; padding: 9px 2px; }
+.fila-ranking + .fila-ranking { border-top: 1px solid var(--line); }
+.fila-ranking-nombre { font-size: .875rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fila-ranking-barra-wrap { background: #eef0f2; border-radius: 20px; height: 10px; overflow: hidden; }
+.fila-ranking-barra { display: block; height: 100%; background: var(--gold); transition: width 1s cubic-bezier(.22, .82, .24, 1); }
+.fila-ranking-valor { font-variant-numeric: tabular-nums; color: var(--ink); font-size: .875rem; min-width: 1.6ch; text-align: right; }
+
 .cards { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--line); border-radius: var(--radius); background: white; overflow: hidden; margin-top: 40px; }
 .card { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; column-gap: 24px; align-items: center; padding: 30px; text-decoration: none; color: var(--ink); border-bottom: 1px solid var(--line); }
 .card:last-child { border-bottom: 0; }
