@@ -103,6 +103,8 @@ td button { font-size: .8rem; min-height: 36px; padding: 7px 12px; }
 .message.mensaje-anim { animation: mensaje-entrada .35s cubic-bezier(.22, .82, .24, 1); }
 
 .register { display: flex; align-items: center; justify-content: space-between; gap: 28px; border-left: 4px solid var(--cover); padding: 30px; }
+@keyframes pulso-exito { 0% { box-shadow: 0 0 0 0 rgba(47, 107, 79, .32); } 70% { box-shadow: 0 0 0 16px rgba(47, 107, 79, 0); } 100% { box-shadow: 0 0 0 0 rgba(47, 107, 79, 0); } }
+.register.pulso-exito { animation: pulso-exito .7s ease-out; }
 .register h2 { margin: 0 0 8px; }
 .register .help { margin: 0; }
 .register .actions { flex-shrink: 0; }

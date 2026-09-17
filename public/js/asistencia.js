@@ -53,6 +53,8 @@ async function registrar(tipo) {
   try {
     const registro = await api(`/api/asistencia/${tipo}`, { method: 'POST', body: '{}' });
     mensaje(`${tipo === 'entrada' ? 'Entrada' : 'Salida'} registrada el ${registro.fecha.split('-').reverse().join('/')} a las ${registro.hora}.`);
+    const tarjeta = document.querySelector('.register');
+    tarjeta.classList.remove('pulso-exito'); void tarjeta.offsetWidth; tarjeta.classList.add('pulso-exito');
   } catch (error) { mensaje(error.message, true); }
   finally { await cargarRegistros(); }
 }
