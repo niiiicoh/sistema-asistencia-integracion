@@ -182,6 +182,7 @@ body.vista-empleado .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); m
 @keyframes confirm-fondo { from { opacity: 0; } to { opacity: 1; } }
 .confirm-dialog { background: var(--surface); border-radius: var(--radius); padding: 26px 26px 20px; max-width: 380px; width: 100%; box-shadow: 0 20px 48px rgba(20, 36, 56, .28); animation: popover-entrada .18s ease-out; }
 .confirm-dialog p { margin: 0 0 22px; color: var(--ink); line-height: 1.55; }
+.confirm-dialog strong { color: var(--wine); }
 .confirm-dialog .actions { justify-content: flex-end; }
 
 #grafico-puntualidad .proporcion { display: flex; height: 28px; border-radius: 20px; overflow: hidden; background: #eef0f2; }

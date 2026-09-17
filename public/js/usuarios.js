@@ -33,7 +33,7 @@ async function cargar() {
       try { await eliminarUsuario(usuario.idUsuario); if (editando === usuario.idUsuario) { mostrarPanel(editor, false); editando = null; } mensaje('Usuario eliminado correctamente.'); await refrescar(); }
       catch (error) {
         if (error.status === 409) {
-          if (await confirmar(`El usuario ${usuario.correo} tiene registros de asistencia. Si continúas, se eliminarán también todas sus marcaciones de forma permanente y no podrán recuperarse. ¿Eliminar de todas formas?`, { textoConfirmar: 'Eliminar todo' })) {
+          if (await confirmar(`El usuario ${usuario.correo} tiene registros de asistencia. ¿Eliminar de todas formas?<br><strong>Se eliminarán por completo el usuario y todas sus marcaciones. Esta acción no se puede deshacer.</strong>`, { textoConfirmar: 'Eliminar todo' })) {
             try { await eliminarUsuario(usuario.idUsuario, true); if (editando === usuario.idUsuario) { mostrarPanel(editor, false); editando = null; } mensaje('Usuario y sus registros de asistencia eliminados.'); await refrescar(); }
             catch (error2) { mensaje(error2.message, true); }
           }
