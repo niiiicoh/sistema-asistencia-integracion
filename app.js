@@ -59,7 +59,7 @@ function createApp({ usuarioService, asistenciaService, authService, reporteServ
   return app;
 }
 
-if (require.main === module) {
+if (process.env.NODE_ENV !== 'test') {
   const db = require('./src/config/database');
   const usuarios = new (require('./src/repositories/UsuarioRepository'))(db);
   const registros = new (require('./src/repositories/RegistroAsistenciaRepository'))(db);
