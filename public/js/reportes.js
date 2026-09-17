@@ -8,9 +8,9 @@ const resultados = document.getElementById('resultados');
 const contador = document.getElementById('contador');
 const hora = document.getElementById('columna-hora');
 const opciones = {
-  atrasos: ['Atrasos', 'Hora de entrada', 'Entradas posteriores a las 09:30:00. Las entradas a las 09:30:00 exactas no son atrasos.'],
-  'salidas-anticipadas': ['Salidas anticipadas', 'Hora de salida', 'Salidas anteriores a las 17:30:00. Las salidas a las 17:30:00 exactas no son anticipadas.'],
-  inasistencias: ['Inasistencias', '', 'Empleados sin ninguna marcación en cada fecha consultada. Se incluyen todos los días: no se descuentan feriados ni fines de semana, no se consideran permisos o vacaciones y no existe todavía un calendario laboral.']
+  atrasos: ['Atrasos', 'Hora de entrada', 'Entradas posteriores a las 09:30:00. Las entradas a las 09:30:00 exactas no son atrasos.', 'atrasos'],
+  'salidas-anticipadas': ['Salidas anticipadas', 'Hora de salida', 'Salidas anteriores a las 17:30:00. Las salidas a las 17:30:00 exactas no son anticipadas.', 'salidas anticipadas'],
+  inasistencias: ['Inasistencias', '', 'Empleados sin ninguna marcación en cada fecha consultada. Se incluyen todos los días: no se descuentan feriados ni fines de semana, no se consideran permisos o vacaciones y no existe todavía un calendario laboral.', 'inasistencias']
 };
 const graficos = document.getElementById('graficos-reportes');
 function vaciar(texto) {
@@ -77,9 +77,10 @@ formulario.onsubmit = async event => {
       if (seleccion !== 'inasistencias') celda(row, fila.hora);
     }
     graficos.hidden = false;
-    const rango = `Del ${desde.value.split('-').reverse().join('/')} al ${hasta.value.split('-').reverse().join('/')} · ${filas.length} resultado${filas.length === 1 ? '' : 's'}.`;
-    document.getElementById('subtitulo-dia').textContent = rango;
-    document.getElementById('subtitulo-empleado').textContent = rango;
+    const [, , , etiquetaMin] = opciones[seleccion];
+    const rango = `del ${desde.value.split('-').reverse().join('/')} al ${hasta.value.split('-').reverse().join('/')}`;
+    document.getElementById('subtitulo-dia').textContent = `Cada barra es la cantidad de ${etiquetaMin} de ese día, ${rango}.`;
+    document.getElementById('subtitulo-empleado').textContent = `Cantidad de ${etiquetaMin} por empleado, ${rango}.`;
     dibujarGraficoDia(agruparPorDia(filas));
     dibujarGraficoEmpleado(agruparPorEmpleado(filas));
   } catch (error) { mensaje(error.message, true); contador.textContent = 'Consulta no completada'; vaciar('No se pudo generar el reporte.'); }

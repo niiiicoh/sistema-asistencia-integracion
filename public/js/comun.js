@@ -14,14 +14,14 @@ function mensaje(texto, error = false) {
 function celda(row, text) { const td = document.createElement('td'); td.textContent = text; row.append(td); return td; }
 function tablaVacia(body, texto) { body.replaceChildren(); const row = body.insertRow(); const td = celda(row, texto); td.colSpan = body.closest('table').querySelectorAll('thead th').length; td.className = 'empty'; }
 function dibujarBarras(svg, datos, { etiqueta = clave => clave, titulo = (etq, valor) => `${etq}: ${valor}` } = {}) {
-  if (!datos.length) { svg.removeAttribute('viewBox'); svg.innerHTML = ''; return; }
-  const base = 62, altoMax = 40, gap = 12, anchoBarra = 34, alto = 84;
-  const max = Math.max(...datos.map(([, valor]) => valor)) || 1;
-  const ancho = gap + datos.length * (anchoBarra + gap);
+  if (!datos.length) { svg.innerHTML = ''; return; }
+  const ancho = 400, base = 62, altoMax = 40, gap = 12, alto = 84;
+  const anchoBarra = Math.min(40, (ancho - gap * (datos.length + 1)) / datos.length);
   svg.setAttribute('viewBox', `0 0 ${ancho} ${alto}`);
-  svg.style.minWidth = `${Math.max(ancho, 240)}px`;
+  const max = Math.max(...datos.map(([, valor]) => valor)) || 1;
+  const inicioFila = (ancho - (datos.length * anchoBarra + (datos.length - 1) * gap)) / 2;
   const barras = datos.map(([clave, valor], i) => {
-    const x = gap + i * (anchoBarra + gap);
+    const x = inicioFila + i * (anchoBarra + gap);
     const h = Math.round(valor / max * altoMax);
     const texto = etiqueta(clave);
     return `<text class="chart-valor" x="${x + anchoBarra / 2}" y="${base - h - 7}" text-anchor="middle">${valor}</text>
