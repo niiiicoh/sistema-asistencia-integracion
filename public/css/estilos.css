@@ -96,6 +96,8 @@ td button { font-size: .8rem; min-height: 36px; padding: 7px 12px; }
 
 .message { border: 1px solid #b7c2ce; border-left: 4px solid var(--cover); background: #eaeef2; color: #17263a; padding: 15px 19px; border-radius: 2px; margin: 0 0 24px; overflow-wrap: anywhere; }
 .message.error { background: #fbeef0; color: #6e1c2c; border-color: #e6c3cb; border-left-color: var(--wine); }
+@keyframes mensaje-entrada { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+.message.mensaje-anim { animation: mensaje-entrada .35s cubic-bezier(.22, .82, .24, 1); }
 
 .register { display: flex; align-items: center; justify-content: space-between; gap: 28px; border-left: 4px solid var(--cover); padding: 30px; }
 .register h2 { margin: 0 0 8px; }
@@ -237,4 +239,4 @@ body.vista-empleado tr.day-row:hover td { background: #f2f4f6; }
   .sidebar nav > a svg { width: 18px; height: 18px; }
 
 }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }

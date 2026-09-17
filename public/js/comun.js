@@ -10,6 +10,9 @@ async function api(url, options = {}) {
 function mensaje(texto, error = false) {
   const element = document.getElementById('mensaje');
   element.textContent = texto; element.className = error ? 'message error' : 'message'; element.hidden = false;
+  element.classList.remove('mensaje-anim');
+  void element.offsetWidth;
+  element.classList.add('mensaje-anim');
 }
 function celda(row, text) { const td = document.createElement('td'); td.textContent = text; row.append(td); return td; }
 function tablaVacia(body, texto) { body.replaceChildren(); const row = body.insertRow(); const td = celda(row, texto); td.colSpan = body.closest('table').querySelectorAll('thead th').length; td.className = 'empty'; }
