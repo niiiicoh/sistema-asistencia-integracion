@@ -92,6 +92,7 @@ asistencia-web/
 ├── database/schema.sql
 ├── database/migrations/001_nombre_apellido.sql
 ├── database/migrations/002_configuracion.sql
+├── database/migrations/003_ips_permitidas.sql
 ├── .env.example
 ├── .gitignore
 ├── app.js
@@ -105,7 +106,7 @@ Las peticiones recorren frontend → rutas/controladores → servicios → repos
 
 ## Actualización del proyecto existente
 
-Para incorporar la restricción de red para marcar asistencia sobre una base ya existente, ejecutar una sola vez `database/migrations/002_configuracion.sql` (crea la tabla `configuracion`; no requiere crear cuentas nuevas). Conservar .env y la base actual, ejecutar npm test y reiniciar npm start. El reinicio cierra las sesiones en memoria; volver a iniciar sesión.
+Para incorporar la restricción de red para marcar asistencia sobre una base ya existente, ejecutar una sola vez `database/migrations/003_ips_permitidas.sql` (crea la tabla `ips_permitidas`; no requiere crear cuentas nuevas). Si la base venía de una instalación previa de esta función con `database/migrations/002_configuracion.sql` ya aplicada, la migración 003 migra automáticamente la IP única que hubiera quedado guardada. Conservar .env y la base actual, ejecutar npm test y reiniciar npm start. El reinicio cierra las sesiones en memoria; volver a iniciar sesión.
 
 ## Instalación y ejecución (solo para una instalación nueva)
 
@@ -169,7 +170,7 @@ Detener el servidor con Ctrl+C.
 ## Despliegue en Hostinger (hPanel, Node.js App)
 
 1. En hPanel &gt; Node.js, crear la aplicación indicando: versión de Node 20.x o superior, la carpeta del proyecto y `app.js` como archivo de inicio.
-2. Crear la base de datos MySQL desde hPanel &gt; Bases de datos e importar **todo** `database/schema.sql` (y `database/migrations/001_nombre_apellido.sql` y `database/migrations/002_configuracion.sql` solo si se parte de un esquema sin esas migraciones) usando phpMyAdmin.
+2. Crear la base de datos MySQL desde hPanel &gt; Bases de datos e importar **todo** `database/schema.sql` (y `database/migrations/001_nombre_apellido.sql` y `database/migrations/003_ips_permitidas.sql` solo si se parte de un esquema sin esas migraciones) usando phpMyAdmin.
 3. Configurar las variables de entorno de la app (una por una o importando un `.env`): `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` con los datos de esa base, y `NODE_ENV=production`. No fijar `PORT` manualmente: Hostinger lo asigna y la app ya lo lee de `process.env.PORT`.
 4. Ejecutar "NPM Install" desde el panel (instala dependencias) y luego iniciar/reiniciar la app.
 5. Verificar que el dominio tenga SSL activo: con `NODE_ENV=production` la cookie de sesión exige HTTPS (`Secure`), y `trust proxy` queda habilitado para que la app confíe en las cabeceras `X-Forwarded-*` del proxy de Hostinger (necesario para el chequeo de origen y el límite de intentos de login).
@@ -207,8 +208,9 @@ El administrador puede definir en Control de asistencia una IP pública permitid
 | PUT | `/api/asistencia/:id` | Admin: corregir tipo, fecha y hora |
 | DELETE | `/api/asistencia/:id` | Admin: eliminar manteniendo la secuencia |
 | GET | `/api/asistencia/usuario/:id` | Registros del usuario |
-| GET | `/api/configuracion/ip-permitida` | Admin: IP permitida actual e IP del solicitante |
-| PUT | `/api/configuracion/ip-permitida` | Admin: definir o limpiar la IP permitida |
+| GET | `/api/configuracion/ips-permitidas` | Admin: lista de IPs permitidas e IP del solicitante |
+| POST | `/api/configuracion/ips-permitidas` | Admin: agregar una IP a la lista (201) |
+| DELETE | `/api/configuracion/ips-permitidas/:idIp` | Admin: quitar una IP de la lista |
 
 Creación de usuario:
 
@@ -234,7 +236,7 @@ La restricción de red para marcar asistencia es opcional (por defecto no hay ni
 
 ## Pruebas
 
-Las pruebas Jest usan repositorios simulados y no necesitan MySQL. Cubren usuarios, generación de correos, autenticación, cierre de sesión, permisos, privacidad de marcaciones, alternancia, edición/eliminación administrativa, validaciones, manejo de errores y la restricción de red para marcar asistencia. El conjunto tiene 104 pruebas en 6 suites. La concurrencia se verificó adicionalmente contra MariaDB real. Consulta VERIFICACION.md.
+Las pruebas Jest usan repositorios simulados y no necesitan MySQL. Cubren usuarios, generación de correos, autenticación, cierre de sesión, permisos, privacidad de marcaciones, alternancia, edición/eliminación administrativa, validaciones, manejo de errores y la restricción de red para marcar asistencia. El conjunto tiene 110 pruebas en 6 suites. La concurrencia se verificó adicionalmente contra MariaDB real. Consulta VERIFICACION.md.
 
 ## Ampliación: nombre y apellido
 
@@ -282,22 +284,23 @@ Requiere la conexión .env disponible y permiso CREATE TEMPORARY TABLES. Crea ú
 
 ## Restricción de red para marcar asistencia
 
-El administrador puede, de forma opcional, restringir el marcado de entrada/salida a una única IP pública (por ejemplo, la IP de la red de la oficina). Es una restricción **presencial**: exige estar conectado físicamente a esa red al momento de marcar, no admite ni reemplaza un acceso remoto. Por defecto no hay ninguna IP configurada y el comportamiento no cambia respecto de versiones anteriores.
+El administrador puede, de forma opcional, restringir el marcado de entrada/salida a una o más IP públicas (por ejemplo, una por cada oficina). Es una restricción **presencial**: exige estar conectado físicamente a una de esas redes al momento de marcar, no admite ni reemplaza un acceso remoto. Por defecto no hay ninguna IP agregada y el comportamiento no cambia respecto de versiones anteriores.
 
 Diseño:
 
-- La IP permitida se guarda como par clave/valor (`ip_permitida_asistencia`) en la nueva tabla `configuracion`, gestionada por `ConfiguracionRepository` y `ConfiguracionService`. Se valida que sea una IPv4 (cuatro octetos 0-255); se rechazan IPv6 y formatos inválidos con 400. Dejar el campo vacío limpia la restricción.
+- Cada IP permitida es una fila en la tabla `ips_permitidas` (`id_ip`, `ip`, `creado_en`), gestionada por `ConfiguracionRepository` y `ConfiguracionService`. Se valida que cada IP sea IPv4 (cuatro octetos 0-255); se rechazan IPv6 y formatos inválidos con 400. Agregar la misma IP dos veces no crea un duplicado.
 - Se usa IPv4 y no IPv6 porque una IPv6 suele cambiar por dispositivo (extensiones de privacidad) y no identifica una red de forma estable, mientras que una IPv4 es típicamente compartida por todos los equipos detrás del mismo NAT.
-- `AsistenciaService.registrar` obtiene el usuario que marca y, **solo si su rol no es ADMINISTRADOR**, valida su IP contra la IP configurada (`validarRed`). El administrador puede marcar, corregir o eliminar registros desde cualquier red, sin excepción.
+- `AsistenciaService.registrar` obtiene el usuario que marca y, **solo si su rol no es ADMINISTRADOR**, valida su IP contra la lista configurada (`validarRed`): basta con coincidir con cualquiera de las IPs agregadas (por ejemplo, la de cualquiera de las dos oficinas). El administrador puede marcar, corregir o eliminar registros desde cualquier red, sin excepción.
 - La IP del solicitante se toma de `req.ip` y se normaliza (`src/utils/normalizarIp.js`) para aceptar tanto `181.42.190.187` como su notación IPv4-mapped `::ffff:181.42.190.187`. En producción, `req.ip` solo refleja la IP real del cliente (y no la del proxy de Hostinger) porque `trust proxy` está habilitado bajo `NODE_ENV=production`.
-- Un empleado conectado desde una red distinta a la configurada recibe 403 con un mensaje explicativo al intentar marcar.
+- Un empleado conectado desde una red que no está en la lista recibe 403 con un mensaje explicativo al intentar marcar.
 - Si la red del cliente prefiere IPv6 (dual-stack), `req.ip` puede llegar como una IPv6 nativa (no IPv4-mapped), que `normalizarIp` no puede convertir a IPv4. En ese caso, el administrador debe ingresar manualmente la IPv4 pública real de la oficina; el botón "Usar mi IP actual" (ver más abajo) ayuda a obtenerla sin depender de qué protocolo eligió el navegador para llegar a la app.
 
-Panel de administración: la sección "Red" del menú (visible solo para administradores, página `red.html`) permite ver la IP configurada, escribir una nueva o limpiarla. El botón "Usar mi IP actual" consulta desde el propio navegador un servicio externo IPv4-only (`https://ipv4.icanhazip.com`) y completa el campo con esa dirección; así siempre obtiene una IPv4 aunque la conexión del navegador hacia la app use IPv6. Si ese servicio no responde, usa como respaldo la IP vista por el servidor (`ipActual`, ver endpoint abajo). Como una IP pública residencial u office puede cambiar con el tiempo, este botón evita depender de recordar o buscar la IP manualmente cada vez que cambia. Al igual que Reportes, la página está protegida en el servidor: anónimo recibe 302 a login y empleado recibe 403.
+Panel de administración: la sección "Red" del menú (visible solo para administradores, página `red.html`) permite agregar una IP nueva y muestra debajo una tabla con el historial de IPs permitidas (IP, fecha en que se agregó y un botón para eliminarla). No hay límite de cuántas IPs se pueden agregar: por ejemplo, con dos oficinas se agrega la IP de cada una y ambas quedan habilitadas para marcar. El botón "Usar mi IP actual" consulta desde el propio navegador un servicio externo IPv4-only (`https://ipv4.icanhazip.com`) y completa el campo con esa dirección; así siempre obtiene una IPv4 aunque la conexión del navegador hacia la app use IPv6. Si ese servicio no responde, usa como respaldo la IP vista por el servidor (`ipActual`, ver endpoint abajo). Al igual que Reportes, la página está protegida en el servidor: anónimo recibe 302 a login y empleado recibe 403.
 
-Endpoints (ambos exclusivos de administrador, devuelven 403 a empleados):
+Endpoints (los tres exclusivos de administrador, devuelven 403 a empleados):
 
-- `GET /api/configuracion/ip-permitida` responde `{ ip, ipActual }`, donde `ip` es la restricción guardada (o `null` si no hay ninguna) e `ipActual` es la IP normalizada del propio solicitante.
-- `PUT /api/configuracion/ip-permitida` recibe `{ ip }`, valida el formato y responde `{ ip }` con el valor guardado; enviar una cadena vacía limpia la restricción.
+- `GET /api/configuracion/ips-permitidas` responde `{ ips, ipActual }`, donde `ips` es el arreglo de IPs permitidas (`{ idIp, ip, creadoEn }`, vacío si no hay restricción) e `ipActual` es la IP normalizada del propio solicitante.
+- `POST /api/configuracion/ips-permitidas` recibe `{ ip }`, valida el formato, la agrega a la lista (201) y responde `{ ips }` con la lista actualizada.
+- `DELETE /api/configuracion/ips-permitidas/:idIp` quita esa IP de la lista y responde `{ ips }` con la lista actualizada; si queda vacía, se vuelve a permitir marcar desde cualquier red.
 
-Para una base ya existente, ejecutar una sola vez `database/migrations/002_configuracion.sql` (crea la tabla `configuracion`). Una base nueva ya la incluye en `database/schema.sql`.
+Para una base ya existente, ejecutar una sola vez `database/migrations/003_ips_permitidas.sql` (crea la tabla `ips_permitidas` y migra automáticamente la IP única que hubiera quedado guardada por una instalación previa de esta función). Una base nueva ya la incluye en `database/schema.sql`.

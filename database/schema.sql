@@ -35,8 +35,10 @@ CREATE INDEX idx_registro_usuario_fecha
 CREATE INDEX idx_registro_fecha_tipo
     ON registros_asistencia (fecha, tipo_registro);
 
-CREATE TABLE IF NOT EXISTS configuracion (
-    clave VARCHAR(50) NOT NULL,
-    valor VARCHAR(255) NULL,
-    CONSTRAINT pk_configuracion PRIMARY KEY (clave)
+CREATE TABLE IF NOT EXISTS ips_permitidas (
+    id_ip INT UNSIGNED AUTO_INCREMENT,
+    ip VARCHAR(15) NOT NULL,
+    creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_ips_permitidas PRIMARY KEY (id_ip),
+    CONSTRAINT uq_ips_permitidas_ip UNIQUE (ip)
 ) ENGINE=InnoDB;

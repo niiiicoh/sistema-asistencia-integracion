@@ -1,17 +1,22 @@
 const AppError = require('../utils/AppError');
-const CLAVE_IP_ASISTENCIA = 'ip_permitida_asistencia';
+function esIpv4Valida(ip) {
+  const partes = ip.split('.');
+  return partes.length === 4 && partes.every(p => /^\d{1,3}$/.test(p) && Number(p) <= 255);
+}
 class ConfiguracionService {
   constructor(repo) { this.repo = repo; }
-  obtenerIpPermitida() { return this.repo.obtener(CLAVE_IP_ASISTENCIA); }
-  async guardarIpPermitida(valor) {
+  listarIpsPermitidas() { return this.repo.listarIps(); }
+  async obtenerIpsPermitidas() { return (await this.repo.listarIps()).map(fila => fila.ip); }
+  async agregarIpPermitida(valor) {
     const ip = typeof valor === 'string' ? valor.trim() : '';
-    if (ip) {
-      const partes = ip.split('.');
-      const valida = partes.length === 4 && partes.every(p => /^\d{1,3}$/.test(p) && Number(p) <= 255);
-      if (!valida) throw new AppError(400, 'Ingrese una dirección IPv4 válida (ej. 181.42.190.187) o déjelo vacío para no restringir.');
-    }
-    await this.repo.guardar(CLAVE_IP_ASISTENCIA, ip || null);
-    return ip || null;
+    if (!ip || !esIpv4Valida(ip)) throw new AppError(400, 'Ingrese una dirección IPv4 válida (ej. 181.42.190.187).');
+    await this.repo.agregarIp(ip);
+    return this.listarIpsPermitidas();
+  }
+  async eliminarIpPermitida(idIp) {
+    if (!/^[1-9]\d*$/.test(String(idIp))) throw new AppError(400, 'ID de IP inválido.');
+    await this.repo.eliminarIp(Number(idIp));
+    return this.listarIpsPermitidas();
   }
 }
 module.exports = ConfiguracionService;

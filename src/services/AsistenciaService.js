@@ -3,7 +3,7 @@ const AppError = require('../utils/AppError');
 const validarId = require('../utils/validarId');
 const esFechaValida = require('../utils/esFechaValida');
 const normalizarIp = require('../utils/normalizarIp');
-const SIN_RESTRICCION = { obtenerIpPermitida: async () => null };
+const SIN_RESTRICCION = { obtenerIpsPermitidas: async () => [] };
 class AsistenciaService {
   constructor(registros, usuarios, reloj = () => new Date(), configuracion = SIN_RESTRICCION) {
     this.registros = registros; this.usuarios = usuarios; this.reloj = reloj; this.configuracion = configuracion;
@@ -14,9 +14,9 @@ class AsistenciaService {
     return id;
   }
   async validarRed(ip) {
-    const ipPermitida = await this.configuracion.obtenerIpPermitida();
-    if (!ipPermitida) return;
-    if (normalizarIp(ip) !== ipPermitida) throw new AppError(403, 'Debes estar conectado a la red de la oficina para marcar asistencia.');
+    const permitidas = await this.configuracion.obtenerIpsPermitidas();
+    if (!permitidas.length) return;
+    if (!permitidas.includes(normalizarIp(ip))) throw new AppError(403, 'Debes estar conectado a la red de la oficina para marcar asistencia.');
   }
   async registrar(idUsuario, tipoRegistro, ip) {
     idUsuario = validarId(idUsuario);

@@ -28,8 +28,12 @@ async function fixture() {
     modificar: async (id, r) => { const i = registros.findIndex(r => String(r.idRegistro) === String(id)); registros[i] = r; return r; },
     eliminar: async id => { registros.splice(registros.findIndex(r => String(r.idRegistro) === String(id)), 1); }
   };
-  const valores = {};
-  const cr = { obtener: async clave => valores[clave] ?? null, guardar: async (clave, valor) => { valores[clave] = valor; } };
+  let nextIp = 1; const ips = [];
+  const cr = {
+    listarIps: async () => [...ips],
+    agregarIp: async ip => { if (!ips.some(fila => fila.ip === ip)) ips.push({ idIp: nextIp++, ip, creadoEn: new Date() }); },
+    eliminarIp: async idIp => { const i = ips.findIndex(fila => fila.idIp === Number(idIp)); if (i >= 0) ips.splice(i, 1); }
+  };
   const configuracionService = new ConfiguracionService(cr);
   const usuarioService = new UsuarioService(ur);
   const asistenciaService = new AsistenciaService(rr, ur, () => new Date(2026, 8, 9, 8, 5, 3), configuracionService);

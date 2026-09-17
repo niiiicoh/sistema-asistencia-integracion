@@ -1,15 +1,38 @@
 window.sesionLista.then(async usuario => {
   if (!usuario || usuario.rol !== 'ADMINISTRADOR') return;
-  const input = document.getElementById('ip-permitida');
+  const input = document.getElementById('ip-nueva');
   const estado = document.getElementById('estado-ip');
-  const boton = document.getElementById('guardar-ip');
+  const boton = document.getElementById('agregar-ip');
+  const cuerpo = document.getElementById('lista-ips');
   let ipActualDetectada = '';
-  const describir = ip => ip ? `Restricción activa: solo se puede marcar desde ${ip}.` : 'Sin restricción de red: cualquiera puede marcar desde donde sea.';
+  const describir = ips => ips.length
+    ? `Restricción activa: se puede marcar desde ${ips.length} IP${ips.length > 1 ? 's' : ''} permitida${ips.length > 1 ? 's' : ''}.`
+    : 'Sin restricción de red: cualquiera puede marcar desde donde sea.';
+  const formatearFecha = iso => new Date(iso).toLocaleString('es-CL');
+  function pintar(ips) {
+    estado.textContent = describir(ips);
+    cuerpo.replaceChildren();
+    if (!ips.length) { tablaVacia(cuerpo, 'No hay IPs permitidas.'); return; }
+    for (const fila of ips) {
+      const row = cuerpo.insertRow();
+      celda(row, fila.ip);
+      celda(row, formatearFecha(fila.creadoEn));
+      const accion = celda(row, '');
+      const eliminar = document.createElement('button'); eliminar.type = 'button'; eliminar.textContent = 'Eliminar'; eliminar.className = 'danger';
+      eliminar.onclick = async () => {
+        if (!await confirmar(`¿Eliminar la IP ${fila.ip} de la lista de permitidas?`)) return;
+        eliminar.disabled = true;
+        try { const datos = await api(`/api/configuracion/ips-permitidas/${fila.idIp}`, { method: 'DELETE' }); pintar(datos.ips); mensaje('IP eliminada.'); }
+        catch (error) { mensaje(error.message, true); eliminar.disabled = false; }
+      };
+      accion.append(eliminar);
+    }
+    animarTabla(cuerpo);
+  }
   try {
-    const datos = await api('/api/configuracion/ip-permitida');
-    input.value = datos.ip || '';
+    const datos = await api('/api/configuracion/ips-permitidas');
     ipActualDetectada = datos.ipActual || '';
-    estado.textContent = describir(datos.ip);
+    pintar(datos.ips);
   } catch (error) { estado.textContent = 'No se pudo cargar la configuración.'; mensaje(error.message, true); }
   const botonIpActual = document.getElementById('usar-ip-actual');
   botonIpActual.onclick = async () => {
@@ -21,13 +44,14 @@ window.sesionLista.then(async usuario => {
     finally { botonIpActual.disabled = false; input.focus(); }
   };
   boton.onclick = async () => {
+    const ipAgregada = input.value.trim();
     boton.disabled = true;
     try {
-      const datos = await api('/api/configuracion/ip-permitida', { method: 'PUT', body: JSON.stringify({ ip: input.value }) });
-      input.value = datos.ip || '';
-      estado.textContent = describir(datos.ip); animarTexto(estado);
-      mensaje(datos.ip ? `Ahora solo se puede marcar asistencia desde ${datos.ip}.` : 'Restricción de red desactivada: ya no importa desde dónde se marque.');
+      const datos = await api('/api/configuracion/ips-permitidas', { method: 'POST', body: JSON.stringify({ ip: ipAgregada }) });
+      pintar(datos.ips); animarTexto(estado);
+      mensaje(`IP ${ipAgregada} agregada.`);
+      input.value = '';
     } catch (error) { mensaje(error.message, true); }
-    finally { boton.disabled = false; }
+    finally { boton.disabled = false; input.focus(); }
   };
 });

@@ -1,11 +1,14 @@
 class ConfiguracionRepository {
   constructor(db) { this.db = db; }
-  async obtener(clave) {
-    const [rows] = await this.db.execute('SELECT valor FROM configuracion WHERE clave = ?', [clave]);
-    return rows[0]?.valor ?? null;
+  async listarIps() {
+    const [rows] = await this.db.execute('SELECT id_ip AS idIp, ip, creado_en AS creadoEn FROM ips_permitidas ORDER BY creado_en, id_ip');
+    return rows;
   }
-  async guardar(clave, valor) {
-    await this.db.execute('INSERT INTO configuracion (clave, valor) VALUES (?, ?) ON DUPLICATE KEY UPDATE valor = VALUES(valor)', [clave, valor]);
+  async agregarIp(ip) {
+    await this.db.execute('INSERT IGNORE INTO ips_permitidas (ip) VALUES (?)', [ip]);
+  }
+  async eliminarIp(idIp) {
+    await this.db.execute('DELETE FROM ips_permitidas WHERE id_ip = ?', [idIp]);
   }
 }
 module.exports = ConfiguracionRepository;

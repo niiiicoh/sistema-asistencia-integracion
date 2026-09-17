@@ -1,5 +1,6 @@
 const normalizarIp = require('../utils/normalizarIp');
 module.exports = service => ({
-  obtenerIp: async (req, res) => res.json({ ip: await service.obtenerIpPermitida(), ipActual: normalizarIp(req.ip) }),
-  guardarIp: async (req, res) => res.json({ ip: await service.guardarIpPermitida(req.body?.ip) })
+  listarIps: async (req, res) => res.json({ ips: await service.listarIpsPermitidas(), ipActual: normalizarIp(req.ip) }),
+  agregarIp: async (req, res) => res.status(201).json({ ips: await service.agregarIpPermitida(req.body?.ip) }),
+  eliminarIp: async (req, res) => res.json({ ips: await service.eliminarIpPermitida(req.params.idIp) })
 });

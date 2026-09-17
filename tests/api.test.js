@@ -72,22 +72,26 @@ test('errores internos no exponen detalles', async()=>{
  f.ur.listar=async()=>{throw new Error('mysql password=secreto');};
  const r=await admin.get('/api/usuarios').expect(500);expect(JSON.stringify(r.body)).not.toMatch(/secreto|stack/);
 });
-test('configuración de IP permitida es exclusiva de administrador', async()=>{
- await empleado.get('/api/configuracion/ip-permitida').expect(403);
- await empleado.put('/api/configuracion/ip-permitida').send({ip:'1.2.3.4'}).expect(403);
+test('IPs permitidas es exclusivo de administrador', async()=>{
+ await empleado.get('/api/configuracion/ips-permitidas').expect(403);
+ await empleado.post('/api/configuracion/ips-permitidas').send({ip:'1.2.3.4'}).expect(403);
+ await empleado.delete('/api/configuracion/ips-permitidas/1').expect(403);
 });
 test('página red.html también está protegida', async()=>{
  await admin.get('/red.html').expect(200);
  await empleado.get('/red.html').expect(403);
  await request(f.app).get('/red.html').expect(302).expect('Location','/login.html');
 });
-test('admin consulta y guarda la IP permitida', async()=>{
- const inicial=await admin.get('/api/configuracion/ip-permitida').expect(200);
- expect(inicial.body.ip).toBeNull();
+test('admin agrega, lista y elimina IPs permitidas (varias oficinas)', async()=>{
+ const inicial=await admin.get('/api/configuracion/ips-permitidas').expect(200);
+ expect(inicial.body.ips).toEqual([]);
  expect(inicial.body).toHaveProperty('ipActual');
- const guardado=await admin.put('/api/configuracion/ip-permitida').send({ip:'181.42.190.187'}).expect(200);
- expect(guardado.body.ip).toBe('181.42.190.187');
- await admin.put('/api/configuracion/ip-permitida').send({ip:'no-valida'}).expect(400);
- await admin.put('/api/configuracion/ip-permitida').send({ip:''}).expect(200);
- expect((await admin.get('/api/configuracion/ip-permitida').expect(200)).body.ip).toBeNull();
+ const primera=await admin.post('/api/configuracion/ips-permitidas').send({ip:'181.42.190.187'}).expect(201);
+ expect(primera.body.ips).toMatchObject([{ip:'181.42.190.187'}]);
+ const segunda=await admin.post('/api/configuracion/ips-permitidas').send({ip:'190.100.50.20'}).expect(201);
+ expect(segunda.body.ips).toMatchObject([{ip:'181.42.190.187'},{ip:'190.100.50.20'}]);
+ await admin.post('/api/configuracion/ips-permitidas').send({ip:'no-valida'}).expect(400);
+ const idPrimera = segunda.body.ips[0].idIp;
+ const final=await admin.delete(`/api/configuracion/ips-permitidas/${idPrimera}`).expect(200);
+ expect(final.body.ips).toMatchObject([{ip:'190.100.50.20'}]);
 });
