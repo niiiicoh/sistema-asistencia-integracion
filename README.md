@@ -153,6 +153,15 @@ Para esta Semana 5 no se requiere importar SQL, crear cuentas ni ejecutar migrac
 
 Detener el servidor con Ctrl+C.
 
+## Despliegue en Hostinger (hPanel, Node.js App)
+
+1. En hPanel &gt; Node.js, crear la aplicación indicando: versión de Node 20.x o superior, la carpeta del proyecto y `app.js` como archivo de inicio.
+2. Crear la base de datos MySQL desde hPanel &gt; Bases de datos e importar **todo** `database/schema.sql` (y `database/migrations/001_nombre_apellido.sql` solo si se parte de un esquema sin esa migración) usando phpMyAdmin.
+3. Configurar las variables de entorno de la app (una por una o importando un `.env`): `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` con los datos de esa base, y `NODE_ENV=production`. No fijar `PORT` manualmente: Hostinger lo asigna y la app ya lo lee de `process.env.PORT`.
+4. Ejecutar "NPM Install" desde el panel (instala dependencias) y luego iniciar/reiniciar la app.
+5. Verificar que el dominio tenga SSL activo: con `NODE_ENV=production` la cookie de sesión exige HTTPS (`Secure`), y `trust proxy` queda habilitado para que la app confíe en las cabeceras `X-Forwarded-*` del proxy de Hostinger (necesario para el chequeo de origen y el límite de intentos de login).
+6. Al ser hosting compartido, el proceso puede reiniciarse por inactividad o mantenimiento; como las sesiones viven en memoria, eso cierra la sesión de todos los usuarios activos. Es el mismo comportamiento documentado para un reinicio local, no un error del despliegue.
+
 ## Uso
 
 Al iniciar sesión, el administrador accede al menú general y el empleado va directamente a Control de asistencia. Cerrar sesión elimina la sesión del servidor y la cookie.
