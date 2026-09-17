@@ -101,8 +101,24 @@ td button { font-size: .8rem; min-height: 36px; padding: 7px 12px; }
 .register .help { margin: 0; }
 .register .actions { flex-shrink: 0; }
 .register button { padding: 16px 22px; }
+.register-icon { display: none; }
 #contador { font-family: var(--mono); font-size: .82rem; color: var(--muted); background: #e3e7eb; padding: 6px 12px; border-radius: 20px; }
 #regla-reporte { padding: 14px 17px; border-left: 3px solid #9aa7b6; background: #f2f4f6; margin-bottom: 23px; }
+
+/* Portal del empleado: una sola tarea (marcar), una sola vista. */
+body.vista-empleado .app-shell main { max-width: 760px; }
+body.vista-empleado .register { flex-direction: column; align-items: center; text-align: center; gap: 16px; border-left: none; border: 1px solid var(--line); padding: 48px 40px; }
+body.vista-empleado .register-icon { display: grid; place-items: center; width: 68px; height: 68px; border-radius: 50%; background: #eef1f4; color: var(--cover); }
+body.vista-empleado .register-icon svg { width: 34px; height: 34px; }
+body.vista-empleado .register h2 { font-size: 1.5rem; }
+body.vista-empleado #estado-marca { font-size: 1.05rem; max-width: 46ch; }
+body.vista-empleado .register .actions { width: 100%; max-width: 320px; }
+body.vista-empleado .register button { width: 100%; min-height: 56px; font-size: 1rem; }
+body.vista-empleado .register button:disabled { display: none; }
+body.vista-empleado #tabla-marcaciones th:first-child, body.vista-empleado #tabla-marcaciones td:first-child { display: none; }
+body.vista-empleado #titulo-registros { margin-top: 44px; }
+body.vista-empleado tr.day-row td { background: #f2f4f6; color: var(--muted); font-weight: 600; font-size: .82rem; padding: 10px 20px; border-bottom: 1px solid var(--line); }
+body.vista-empleado tr.day-row:hover td { background: #f2f4f6; }
 
 .cards { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--line); border-radius: var(--radius); background: white; overflow: hidden; margin-top: 40px; }
 .card { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; column-gap: 24px; align-items: center; padding: 30px; text-decoration: none; color: var(--ink); border-bottom: 1px solid var(--line); }

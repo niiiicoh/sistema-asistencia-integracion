@@ -11,7 +11,16 @@ async function cargarRegistros() {
     entrada.disabled = dentro; salida.disabled = !dentro;
     document.getElementById('estado-marca').textContent = dentro ? 'Entrada registrada. Tu próxima marca es una salida.' : 'Sin entrada pendiente. Puedes registrar una entrada.';
     if (!registros.length) return tablaVacia(body, 'Aún no hay registros de asistencia.');
+    let fechaAnterior = null;
     for (const registro of registros) {
+      if (usuarioActual.rol !== 'ADMINISTRADOR' && registro.fecha !== fechaAnterior) {
+        fechaAnterior = registro.fecha;
+        const fila = body.insertRow(); fila.className = 'day-row';
+        const celdaDia = fila.insertCell(); celdaDia.colSpan = 3;
+        const fecha = new Date(`${registro.fecha}T00:00:00`);
+        const texto = fecha.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+        celdaDia.textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
+      }
       const row = body.insertRow(); celda(row, registro.usuario);
       const badge = document.createElement('span'); badge.className = `badge ${registro.tipoRegistro}`; badge.textContent = registro.tipoRegistro === 'ENTRADA' ? 'Entrada' : 'Salida'; celda(row, '').append(badge);
       celda(row, registro.fecha.split('-').reverse().join('/')); celda(row, registro.hora);
