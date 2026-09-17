@@ -22,7 +22,7 @@ a { color: var(--gold); }
 button, input, select { font: inherit; }
 button, a, input, select { -webkit-tap-highlight-color: transparent; }
 [hidden] { display: none !important; }
-:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; transition: outline-offset .15s ease; }
 main:focus { outline: none; }
 .skip-link { position: fixed; left: 20px; top: -100px; z-index: 10; background: white; padding: 12px 18px; border-radius: 4px; }
 .skip-link:focus { top: 12px; }
@@ -104,7 +104,7 @@ td button { font-size: .8rem; min-height: 36px; padding: 7px 12px; }
 .message.error { background: #fbeef0; color: #6e1c2c; border-color: #e6c3cb; border-left-color: var(--wine); }
 @keyframes mensaje-entrada { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 .message.mensaje-anim { animation: mensaje-entrada .35s cubic-bezier(.22, .82, .24, 1); }
-#estado-marca.mensaje-anim { animation: mensaje-entrada .3s ease; }
+.mensaje-anim { animation: mensaje-entrada .3s ease; }
 @keyframes tabla-entrada { from { opacity: 0; } to { opacity: 1; } }
 tbody.tabla-anim { animation: tabla-entrada .3s ease; }
 
@@ -165,6 +165,7 @@ body.vista-empleado tr.day-row:hover td { background: #f2f4f6; }
 
 .chart-popover { position: absolute; z-index: 30; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; min-width: 200px; max-width: 280px; box-shadow: 0 8px 24px rgba(20, 36, 56, .18); transform-origin: top center; animation: popover-entrada .16s ease-out; }
 @keyframes popover-entrada { from { opacity: 0; transform: scale(.94) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.entrada-pop { animation: popover-entrada .18s ease-out; }
 .chart-popover strong { display: block; font-family: var(--display); font-size: .95rem; padding-right: 22px; margin-bottom: 10px; color: var(--ink); }
 .chart-popover ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; max-height: 220px; overflow-y: auto; }
 .chart-popover li { font-size: .85rem; color: var(--ink); overflow-wrap: anywhere; }

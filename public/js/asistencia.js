@@ -12,7 +12,7 @@ async function cargarRegistros() {
     entrada.disabled = dentro; salida.disabled = !dentro;
     const estado = document.getElementById('estado-marca');
     estado.textContent = dentro ? 'Entrada registrada. Tu próxima marca es una salida.' : 'Sin entrada pendiente. Puedes registrar una entrada.';
-    estado.classList.remove('mensaje-anim'); void estado.offsetWidth; estado.classList.add('mensaje-anim');
+    animarTexto(estado);
     if (!registros.length) return tablaVacia(body, 'Aún no hay registros de asistencia.');
     let fechaAnterior = null;
     for (const registro of registros) {

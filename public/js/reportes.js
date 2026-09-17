@@ -82,9 +82,9 @@ function dibujarGraficoEmpleado(datos) {
 formulario.onchange = () => {
   const [titulo, columna, regla] = opciones[tipo.value];
   document.getElementById('titulo-resultados').textContent = titulo;
-  document.getElementById('regla-reporte').textContent = regla;
+  const reglaEl = document.getElementById('regla-reporte'); reglaEl.textContent = regla; animarTexto(reglaEl);
   hora.textContent = columna; hora.hidden = !columna;
-  contador.textContent = 'Sin consulta';
+  contador.textContent = 'Sin consulta'; animarTexto(contador);
   document.getElementById('mensaje').hidden = true;
   vaciar('Genera el reporte con los filtros seleccionados.');
 };
@@ -98,10 +98,10 @@ formulario.onsubmit = async event => {
   generar.classList.add('cargando');
   resultadosZona.classList.add('consultando');
   document.getElementById('mensaje').hidden = true;
-  contador.textContent = 'Consultando…'; vaciar('Consultando registros…');
+  contador.textContent = 'Consultando…'; animarTexto(contador); vaciar('Consultando registros…');
   try {
     const filas = await api(`/api/reportes/${seleccion}?${params}`);
-    contador.textContent = `${filas.length} resultado${filas.length === 1 ? '' : 's'}`;
+    contador.textContent = `${filas.length} resultado${filas.length === 1 ? '' : 's'}`; animarTexto(contador);
     resultados.replaceChildren();
     if (!filas.length) return vaciar('No existen resultados para los filtros seleccionados.');
     for (const fila of filas) {
@@ -118,8 +118,9 @@ formulario.onsubmit = async event => {
     dibujarGraficoDia(filas);
     dibujarGraficoEmpleado(agruparPorEmpleado(filas));
     descargar.hidden = false;
+    descargar.classList.remove('entrada-pop'); void descargar.offsetWidth; descargar.classList.add('entrada-pop');
     descargar.onclick = () => descargarReporteWord(seleccion, filas);
-  } catch (error) { mensaje(error.message, true); contador.textContent = 'Consulta no completada'; vaciar('No se pudo generar el reporte.'); }
+  } catch (error) { mensaje(error.message, true); contador.textContent = 'Consulta no completada'; animarTexto(contador); vaciar('No se pudo generar el reporte.'); }
   finally { controles.forEach(c => { c.disabled = false; }); generar.classList.remove('cargando'); resultadosZona.classList.remove('consultando'); }
 };
 window.sesionLista.then(async usuario => {

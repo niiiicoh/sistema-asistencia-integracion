@@ -14,6 +14,11 @@ function mensaje(texto, error = false) {
   void element.offsetWidth;
   element.classList.add('mensaje-anim');
 }
+function animarTexto(elemento) {
+  elemento.classList.remove('mensaje-anim');
+  void elemento.offsetWidth;
+  elemento.classList.add('mensaje-anim');
+}
 function animarTabla(tbody) {
   tbody.classList.remove('tabla-anim');
   void tbody.offsetWidth;
