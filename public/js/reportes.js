@@ -14,6 +14,7 @@ const opciones = {
 };
 const graficos = document.getElementById('graficos-reportes');
 const descargar = document.getElementById('descargar-reporte');
+const resultadosZona = document.getElementById('resultados-zona');
 function vaciar(texto) {
   tablaVacia(resultados, texto);
   resultados.rows[0].cells[0].colSpan = tipo.value === 'inasistencias' ? 5 : 6;
@@ -95,6 +96,7 @@ formulario.onsubmit = async event => {
   if (empleado.value) params.set('idUsuario', empleado.value);
   const controles = [...formulario.elements]; controles.forEach(c => { c.disabled = true; });
   generar.classList.add('cargando');
+  resultadosZona.classList.add('consultando');
   document.getElementById('mensaje').hidden = true;
   contador.textContent = 'Consultando…'; vaciar('Consultando registros…');
   try {
@@ -118,7 +120,7 @@ formulario.onsubmit = async event => {
     descargar.hidden = false;
     descargar.onclick = () => descargarReporteWord(seleccion, filas);
   } catch (error) { mensaje(error.message, true); contador.textContent = 'Consulta no completada'; vaciar('No se pudo generar el reporte.'); }
-  finally { controles.forEach(c => { c.disabled = false; }); generar.classList.remove('cargando'); }
+  finally { controles.forEach(c => { c.disabled = false; }); generar.classList.remove('cargando'); resultadosZona.classList.remove('consultando'); }
 };
 window.sesionLista.then(async usuario => {
   if (!usuario || usuario.rol !== 'ADMINISTRADOR') return;

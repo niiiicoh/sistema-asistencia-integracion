@@ -12,7 +12,9 @@
 <label>Fecha hasta<input type="date" id="hasta" min="1000-01-01" max="9999-12-31" required></label>
 </div><p id="regla-reporte" class="help">Entradas posteriores a las 09:30:00. Las entradas a las 09:30:00 exactas no son atrasos.</p>
 <button id="generar" disabled>Generar reporte</button></form>
+<div id="resultados-zona">
 <div id="graficos-reportes" class="charts-row" hidden><section class="panel chart-card"><h2>Por día</h2><p id="subtitulo-dia" class="chart-sub"></p><div class="chart-scroll"><svg id="grafico-dia" class="chart-bars" role="img" aria-label="Resultados por día"></svg></div></section><section class="panel chart-card"><h2>Por empleado</h2><p id="subtitulo-empleado" class="chart-sub"></p><div id="grafico-empleado" class="ranking"></div></section></div>
 <div class="heading"><h2 id="titulo-resultados">Atrasos</h2><span class="actions"><button id="descargar-reporte" type="button" class="secondary" hidden>Descargar (Word)</button><span id="contador" role="status" aria-live="polite">Sin consulta</span></span></div>
 <div class="table-wrap" tabindex="0" role="region" aria-label="Tabla de resultados"><table><thead><tr><th scope="col">ID usuario</th><th scope="col">Nombre</th><th scope="col">Apellido</th><th scope="col">Correo</th><th scope="col">Fecha</th><th scope="col" id="columna-hora">Hora de entrada</th></tr></thead><tbody id="resultados"><tr><td class="empty" colspan="6">Selecciona las fechas y genera un reporte.</td></tr></tbody></table></div>
+</div>
 </main></body></html>
