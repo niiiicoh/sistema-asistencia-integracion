@@ -1,4 +1,5 @@
 /* Asistencia: un libro de registro — tinta sobre papel, acentos de oro envejecido. */
+@view-transition { navigation: auto; }
 :root {
   font-family: "Segoe UI", Arial, sans-serif;
   color: #1a1e24;
@@ -258,4 +259,7 @@ body.vista-empleado tr.day-row:hover td { background: #f2f4f6; }
   .sidebar nav > a svg { width: 18px; height: 18px; }
 
 }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+  @view-transition { navigation: none; }
+}
