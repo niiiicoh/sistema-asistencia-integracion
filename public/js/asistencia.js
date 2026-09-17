@@ -10,7 +10,9 @@ async function cargarRegistros() {
     const propias = registros.filter(r => Number(r.idUsuario) === Number(usuarioActual.idUsuario)).sort((a,b) => `${b.fecha} ${b.hora}`.localeCompare(`${a.fecha} ${a.hora}`) || (BigInt(a.idRegistro) > BigInt(b.idRegistro) ? -1 : 1));
     const dentro = propias[0]?.tipoRegistro === 'ENTRADA';
     entrada.disabled = dentro; salida.disabled = !dentro;
-    document.getElementById('estado-marca').textContent = dentro ? 'Entrada registrada. Tu próxima marca es una salida.' : 'Sin entrada pendiente. Puedes registrar una entrada.';
+    const estado = document.getElementById('estado-marca');
+    estado.textContent = dentro ? 'Entrada registrada. Tu próxima marca es una salida.' : 'Sin entrada pendiente. Puedes registrar una entrada.';
+    estado.classList.remove('mensaje-anim'); void estado.offsetWidth; estado.classList.add('mensaje-anim');
     if (!registros.length) return tablaVacia(body, 'Aún no hay registros de asistencia.');
     let fechaAnterior = null;
     for (const registro of registros) {
