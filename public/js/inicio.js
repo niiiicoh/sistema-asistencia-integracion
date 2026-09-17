@@ -22,20 +22,11 @@ function dibujarGraficoSemana(registros) {
   const dias = [];
   const hoy = new Date();
   for (let i = 6; i >= 0; i--) { const d = new Date(hoy); d.setDate(d.getDate() - i); dias.push(d.toISOString().slice(0, 10)); }
-  const conteos = dias.map(f => registros.filter(r => r.fecha === f).length);
-  const max = Math.max(1, ...conteos);
-  const ancho = 340, alto = 150, base = 122, altoMax = 88, gap = 12;
-  const anchoBarra = (ancho - gap * (dias.length + 1)) / dias.length;
-  const svg = document.getElementById('grafico-semana');
-  svg.innerHTML = dias.map((f, i) => {
-    const x = gap + i * (anchoBarra + gap);
-    const h = Math.round(conteos[i] / max * altoMax);
-    const etiqueta = new Date(`${f}T00:00:00`).toLocaleDateString('es-CL', { weekday: 'short' }).replace('.', '');
-    return `<text class="chart-valor" x="${x + anchoBarra / 2}" y="${base - h - 8}" text-anchor="middle">${conteos[i]}</text>
-      <rect class="chart-barra" x="${x}" y="${base - h}" width="${anchoBarra}" height="${h}"><title>${etiqueta}: ${conteos[i]} marcaciones</title></rect>
-      <text class="chart-etiqueta" x="${x + anchoBarra / 2}" y="${base + 18}" text-anchor="middle">${etiqueta}</text>`;
-  }).join('');
-  requestAnimationFrame(() => requestAnimationFrame(() => { svg.querySelectorAll('.chart-barra').forEach(barra => barra.classList.add('crecer')); }));
+  const datos = dias.map(f => [f, registros.filter(r => r.fecha === f).length]);
+  dibujarBarras(document.getElementById('grafico-semana'), datos, {
+    etiqueta: f => new Date(`${f}T00:00:00`).toLocaleDateString('es-CL', { weekday: 'short' }).replace('.', ''),
+    titulo: (etq, valor) => `${etq}: ${valor} marcaciones`
+  });
 }
 function dibujarGraficoPuntualidad(registros) {
   const hoy = new Date().toISOString().slice(0, 10);

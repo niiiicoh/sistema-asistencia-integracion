@@ -32,22 +32,10 @@ function agruparPorEmpleado(filas) {
   return [...mapa.values()].sort((a, b) => b.total - a.total);
 }
 function dibujarGraficoDia(datos) {
-  const svg = document.getElementById('grafico-dia');
-  if (!datos.length) { svg.innerHTML = ''; return; }
-  const base = 122, altoMax = 88, gap = 12, anchoBarra = 34;
-  const max = Math.max(...datos.map(([, valor]) => valor));
-  const ancho = gap + datos.length * (anchoBarra + gap);
-  svg.setAttribute('viewBox', `0 0 ${ancho} 150`);
-  svg.style.minWidth = `${Math.max(ancho, 260)}px`;
-  svg.innerHTML = datos.map(([fecha, valor], i) => {
-    const x = gap + i * (anchoBarra + gap);
-    const h = Math.round(valor / max * altoMax);
-    const etiqueta = fecha.split('-').slice(1).reverse().join('/');
-    return `<text class="chart-valor" x="${x + anchoBarra / 2}" y="${base - h - 8}" text-anchor="middle">${valor}</text>
-      <rect class="chart-barra" x="${x}" y="${base - h}" width="${anchoBarra}" height="${h}"><title>${etiqueta}: ${valor}</title></rect>
-      <text class="chart-etiqueta" x="${x + anchoBarra / 2}" y="${base + 18}" text-anchor="middle">${etiqueta}</text>`;
-  }).join('');
-  requestAnimationFrame(() => requestAnimationFrame(() => { svg.querySelectorAll('.chart-barra').forEach(barra => barra.classList.add('crecer')); }));
+  dibujarBarras(document.getElementById('grafico-dia'), datos, {
+    etiqueta: fecha => fecha.split('-').slice(1).reverse().join('/'),
+    titulo: (etq, valor) => `${etq}: ${valor}`
+  });
 }
 function dibujarGraficoEmpleado(datos) {
   const contenedor = document.getElementById('grafico-empleado');
@@ -89,6 +77,9 @@ formulario.onsubmit = async event => {
       if (seleccion !== 'inasistencias') celda(row, fila.hora);
     }
     graficos.hidden = false;
+    const rango = `Del ${desde.value.split('-').reverse().join('/')} al ${hasta.value.split('-').reverse().join('/')} · ${filas.length} resultado${filas.length === 1 ? '' : 's'}.`;
+    document.getElementById('subtitulo-dia').textContent = rango;
+    document.getElementById('subtitulo-empleado').textContent = rango;
     dibujarGraficoDia(agruparPorDia(filas));
     dibujarGraficoEmpleado(agruparPorEmpleado(filas));
   } catch (error) { mensaje(error.message, true); contador.textContent = 'Consulta no completada'; vaciar('No se pudo generar el reporte.'); }

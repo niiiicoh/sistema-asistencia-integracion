@@ -137,12 +137,15 @@ body.vista-empleado tr.day-row:hover td { background: #f2f4f6; }
 .stat span { display: block; margin-top: 6px; color: var(--muted); font-size: .875rem; }
 
 .charts-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-bottom: 36px; }
-.chart-card h2 { margin-bottom: 18px; }
-.chart-bars { width: 100%; height: auto; overflow: visible; }
-.chart-barra { fill: var(--gold); transform-box: fill-box; transform-origin: bottom; transform: scaleY(0); transition: transform 1s cubic-bezier(.22, .82, .24, 1); }
+.chart-card h2 { margin-bottom: 4px; }
+.chart-sub { margin: 0 0 18px; color: var(--muted); font-size: .8rem; min-height: 1.2em; }
+.chart-scroll { overflow-x: auto; }
+.chart-bars { display: block; width: 100%; height: auto; overflow: visible; }
+.chart-base { stroke: var(--line); stroke-width: 1; }
+.chart-barra { fill: var(--gold); transform-box: fill-box; transform-origin: bottom; transform: scaleY(0); transition: transform .9s cubic-bezier(.22, .82, .24, 1); }
 .chart-barra.crecer { transform: scaleY(1); }
-.chart-valor { font-family: var(--mono); font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
-.chart-etiqueta { font-family: "Segoe UI", Arial, sans-serif; font-size: 11px; fill: var(--muted); }
+.chart-valor { font-family: var(--mono); font-size: 6px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+.chart-etiqueta { font-family: "Segoe UI", Arial, sans-serif; font-size: 6px; fill: var(--muted); }
 
 #grafico-puntualidad .proporcion { display: flex; height: 28px; border-radius: 20px; overflow: hidden; background: #eef0f2; }
 #grafico-puntualidad .segmento { display: block; height: 100%; transition: width 1s cubic-bezier(.22, .82, .24, 1); }
