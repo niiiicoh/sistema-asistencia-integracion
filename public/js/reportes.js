@@ -13,10 +13,31 @@ const opciones = {
   inasistencias: ['Inasistencias', '', 'Empleados sin ninguna marcación en cada fecha consultada. Se incluyen todos los días: no se descuentan feriados ni fines de semana, no se consideran permisos o vacaciones y no existe todavía un calendario laboral.', 'inasistencias']
 };
 const graficos = document.getElementById('graficos-reportes');
+const descargar = document.getElementById('descargar-reporte');
 function vaciar(texto) {
   tablaVacia(resultados, texto);
   resultados.rows[0].cells[0].colSpan = tipo.value === 'inasistencias' ? 5 : 6;
   graficos.hidden = true;
+  descargar.hidden = true;
+}
+function descargarReporteWord(seleccion, filas) {
+  const [titulo] = opciones[seleccion];
+  const rango = `${desde.value.split('-').reverse().join('/')} al ${hasta.value.split('-').reverse().join('/')}`;
+  const columnaHora = seleccion === 'inasistencias' ? '' : '<th>Hora</th>';
+  const filasHtml = filas.map(f => `<tr><td>${f.idUsuario}</td><td>${f.nombre ?? 'Pendiente'}</td><td>${f.apellido ?? 'Pendiente'}</td><td>${f.correo}</td><td>${f.fecha.split('-').reverse().join('/')}</td>${f.hora ? `<td>${f.hora}</td>` : ''}</tr>`).join('');
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${titulo}</title></head><body>
+    <h1 style="font-family:Arial,sans-serif;">${titulo}</h1>
+    <p style="font-family:Arial,sans-serif;">Del ${rango} · ${filas.length} resultado${filas.length === 1 ? '' : 's'}</p>
+    <table border="1" cellpadding="6" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px;">
+      <thead><tr><th>ID</th><th>Nombre</th><th>Apellido</th><th>Correo</th><th>Fecha</th>${columnaHora}</tr></thead>
+      <tbody>${filasHtml}</tbody>
+    </table></body></html>`;
+  const blob = new Blob(['﻿', html], { type: 'application/msword' });
+  const enlace = document.createElement('a');
+  enlace.href = URL.createObjectURL(blob);
+  enlace.download = `${seleccion}_${desde.value}_${hasta.value}.doc`;
+  document.body.append(enlace); enlace.click(); enlace.remove();
+  URL.revokeObjectURL(enlace.href);
 }
 function agruparPorDia(filas) {
   const mapa = new Map();
@@ -93,6 +114,8 @@ formulario.onsubmit = async event => {
     document.getElementById('subtitulo-empleado').textContent = `Cantidad de ${etiquetaMin} por empleado, ${rango}.`;
     dibujarGraficoDia(filas);
     dibujarGraficoEmpleado(agruparPorEmpleado(filas));
+    descargar.hidden = false;
+    descargar.onclick = () => descargarReporteWord(seleccion, filas);
   } catch (error) { mensaje(error.message, true); contador.textContent = 'Consulta no completada'; vaciar('No se pudo generar el reporte.'); }
   finally { controles.forEach(c => { c.disabled = false; }); }
 };
