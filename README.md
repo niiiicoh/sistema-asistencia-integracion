@@ -31,7 +31,6 @@ asistencia-web/
 │   ├── usuarios.html
 │   ├── reportes.html
 │   ├── asistencia.html
-│   ├── historial.html
 │   ├── red.html
 │   ├── css/estilos.css
 │   └── js/
@@ -42,7 +41,6 @@ asistencia-web/
 │       ├── reportes.js
 │       ├── usuarios.js
 │       ├── asistencia.js
-│       ├── historial.js
 │       └── configuracionRed.js
 ├── src/
 │   ├── config/database.js
@@ -183,6 +181,8 @@ Al iniciar sesión, el administrador accede al menú general y el empleado va di
 El administrador crea usuarios ingresando nombre, apellido, contraseña y rol. El correo se asigna al guardar: Bastián Alegría produce bastian.alegria@empresa.cl. Se eliminan tildes, se utilizan minúsculas y los espacios se convierten en puntos. Para homónimos se agrega un número (bastian.alegria2@empresa.cl). No se crea un buzón de correo real: es el identificador de acceso. El correo se conserva al editar, aunque se cambie el nombre. Una contraseña vacía en el formulario de edición conserva la anterior.
 
 Cada persona marca su propia entrada/salida; el backend toma su ID de la sesión e ignora un ID enviado por el navegador. Un empleado no puede ver registros ajenos ni modificar o eliminar registros. El administrador ve todos los registros y dispone de Editar/Eliminar. La edición permite corregir tipo, fecha y hora; no permite reasignar un registro a otra persona.
+
+Control de asistencia es también la página de inicio del empleado (no existe una página "Historial" separada: se fusionó, ya que mostraba los mismos datos). Además de marcar entrada/salida y ver "Mis marcaciones" agrupadas por día, el empleado ve un resumen de su semana (días trabajados y horas trabajadas, calculadas emparejando sus propias marcas ENTRADA/SALIDA de los últimos 7 días) y un gráfico de sus marcaciones por día, calculados en el navegador a partir de los mismos datos que ya se cargan para la tabla, sin llamadas adicionales al servidor.
 
 Las marcas deben alternar ENTRADA y SALIDA: no se permite una SALIDA inicial, dos ENTRADAS consecutivas ni dos SALIDAS consecutivas. Una entrada puede cerrarse al día siguiente. Se usa el orden de fecha/hora y, en caso de empate, ID. Las correcciones también deben mantener la secuencia: para eliminar un par entrada/salida, eliminar primero la salida y después la entrada. Un cambio que deje una salida huérfana o dos entradas devuelve 409.
 

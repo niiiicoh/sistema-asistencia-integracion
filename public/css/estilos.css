@@ -135,6 +135,7 @@ body.vista-empleado #titulo-registros, body.vista-empleado #marcaciones-wrap { d
 body.vista-empleado #titulo-registros { margin-top: 44px; }
 body.vista-empleado tr.day-row td { background: #f2f4f6; color: var(--muted); font-weight: 600; font-size: .82rem; padding: 10px 20px; border-bottom: 1px solid var(--line); }
 body.vista-empleado tr.day-row:hover td { background: #f2f4f6; }
+body.vista-empleado .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 28px; }
 
 .home-hero { display: flex; align-items: center; justify-content: space-between; gap: 40px; margin-bottom: 36px; }
 .home-hero h1 { margin-bottom: 10px; }

@@ -13,6 +13,7 @@ async function cargarRegistros() {
     const estado = document.getElementById('estado-marca');
     estado.textContent = dentro ? 'Entrada registrada. Tu próxima marca es una salida.' : 'Sin entrada pendiente. Puedes registrar una entrada.';
     animarTexto(estado);
+    if (usuarioActual.rol !== 'ADMINISTRADOR') pintarResumenSemana(propias);
     if (!registros.length) return tablaVacia(body, 'Aún no hay registros de asistencia.');
     let fechaAnterior = null;
     for (const registro of registros) {
@@ -51,6 +52,20 @@ async function cargarRegistros() {
     }
     animarTabla(body);
   } catch (error) { tablaVacia(body, 'No se pudieron cargar los registros. Recarga la página para reintentar.'); mensaje(error.message, true); }
+}
+function pintarResumenSemana(propias) {
+  const hoy = new Date(); const inicioSemana = new Date(hoy); inicioSemana.setDate(inicioSemana.getDate() - 6);
+  const desde = inicioSemana.toISOString().slice(0, 10);
+  const semana = propias.filter(r => r.fecha >= desde).sort((a, b) => `${a.fecha} ${a.hora}`.localeCompare(`${b.fecha} ${b.hora}`));
+  const dias = new Set(semana.filter(r => r.tipoRegistro === 'ENTRADA').map(r => r.fecha));
+  let minutos = 0, entradaPendiente = null;
+  for (const r of semana) {
+    if (r.tipoRegistro === 'ENTRADA') entradaPendiente = r;
+    else if (entradaPendiente) { minutos += (new Date(`${r.fecha}T${r.hora}`) - new Date(`${entradaPendiente.fecha}T${entradaPendiente.hora}`)) / 60000; entradaPendiente = null; }
+  }
+  animarConteo(document.getElementById('stat-dias'), dias.size);
+  animarConteo(document.getElementById('stat-horas'), Math.round(minutos / 60));
+  dibujarGraficoSemana(document.getElementById('grafico-semana-empleado'), propias);
 }
 async function registrar(tipo) {
   entrada.disabled = salida.disabled = true;
