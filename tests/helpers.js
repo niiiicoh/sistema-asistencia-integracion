@@ -2,6 +2,7 @@ const Usuario = require('../src/models/Usuario');
 const UsuarioService = require('../src/services/UsuarioService');
 const AsistenciaService = require('../src/services/AsistenciaService');
 const AuthService = require('../src/services/AuthService');
+const ConfiguracionService = require('../src/services/ConfiguracionService');
 const hash = require('../src/utils/password');
 const { createApp } = require('../app');
 async function fixture() {
@@ -27,9 +28,12 @@ async function fixture() {
     modificar: async (id, r) => { const i = registros.findIndex(r => String(r.idRegistro) === String(id)); registros[i] = r; return r; },
     eliminar: async id => { registros.splice(registros.findIndex(r => String(r.idRegistro) === String(id)), 1); }
   };
+  const valores = {};
+  const cr = { obtener: async clave => valores[clave] ?? null, guardar: async (clave, valor) => { valores[clave] = valor; } };
+  const configuracionService = new ConfiguracionService(cr);
   const usuarioService = new UsuarioService(ur);
-  const asistenciaService = new AsistenciaService(rr, ur, () => new Date(2026, 8, 9, 8, 5, 3));
+  const asistenciaService = new AsistenciaService(rr, ur, () => new Date(2026, 8, 9, 8, 5, 3), configuracionService);
   const authService = new AuthService(ur);
-  return { app: createApp({ usuarioService, asistenciaService, authService }), usuarioService, asistenciaService, authService, ur, rr, registros };
+  return { app: createApp({ usuarioService, asistenciaService, authService, configuracionService }), usuarioService, asistenciaService, authService, configuracionService, ur, rr, cr, registros };
 }
 module.exports = fixture;

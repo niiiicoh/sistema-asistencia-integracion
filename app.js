@@ -4,7 +4,7 @@ const express = require('express');
 const path = require('node:path');
 const AppError = require('./src/utils/AppError');
 
-function createApp({ usuarioService, asistenciaService, authService, reporteService }) {
+function createApp({ usuarioService, asistenciaService, authService, reporteService, configuracionService }) {
   const app = express();
   app.disable('x-powered-by');
   if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
@@ -40,6 +40,7 @@ function createApp({ usuarioService, asistenciaService, authService, reporteServ
   app.use('/api/usuarios', admin, require('./src/routes/usuarioRoutes')(usuarioService));
   app.use('/api/asistencia', require('./src/routes/asistenciaRoutes')(asistenciaService));
   app.use('/api/reportes', require('./src/routes/reporteRoutes')(reporteService));
+  app.use('/api/configuracion', admin, require('./src/routes/configuracionRoutes')(configuracionService));
   app.get('/reportes.html', (req, res, next) => {
     if (!req.usuario) return res.redirect('/login.html');
     next();
@@ -65,11 +66,13 @@ if (process.env.NODE_ENV !== 'test') {
   const db = require('./src/config/database');
   const usuarios = new (require('./src/repositories/UsuarioRepository'))(db);
   const registros = new (require('./src/repositories/RegistroAsistenciaRepository'))(db);
+  const configuracionService = new (require('./src/services/ConfiguracionService'))(new (require('./src/repositories/ConfiguracionRepository'))(db));
   const app = createApp({
     authService: new (require('./src/services/AuthService'))(usuarios),
     reporteService: new (require('./src/services/ReporteService'))(new (require('./src/repositories/ReporteRepository'))(db), usuarios),
     usuarioService: new (require('./src/services/UsuarioService'))(usuarios),
-    asistenciaService: new (require('./src/services/AsistenciaService'))(registros, usuarios)
+    asistenciaService: new (require('./src/services/AsistenciaService'))(registros, usuarios, undefined, configuracionService),
+    configuracionService
   });
   const port = Number(process.env.PORT || 3000);
   const host = process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');

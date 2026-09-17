@@ -2,15 +2,28 @@ const RegistroAsistencia = require('../models/RegistroAsistencia');
 const AppError = require('../utils/AppError');
 const validarId = require('../utils/validarId');
 const esFechaValida = require('../utils/esFechaValida');
+const normalizarIp = require('../utils/normalizarIp');
+const SIN_RESTRICCION = { obtenerIpPermitida: async () => null };
 class AsistenciaService {
-  constructor(registros, usuarios, reloj = () => new Date()) { this.registros = registros; this.usuarios = usuarios; this.reloj = reloj; }
+  constructor(registros, usuarios, reloj = () => new Date(), configuracion = SIN_RESTRICCION) {
+    this.registros = registros; this.usuarios = usuarios; this.reloj = reloj; this.configuracion = configuracion;
+  }
   async validarUsuario(id) {
     id = validarId(id);
     if (!await this.usuarios.buscarPorId(id)) throw new AppError(404, 'El usuario no existe.');
     return id;
   }
-  async registrar(idUsuario, tipoRegistro) {
-    idUsuario = await this.validarUsuario(idUsuario);
+  async validarRed(ip) {
+    const ipPermitida = await this.configuracion.obtenerIpPermitida();
+    if (!ipPermitida) return;
+    if (normalizarIp(ip) !== ipPermitida) throw new AppError(403, 'Debes estar conectado a la red de la oficina para marcar asistencia.');
+  }
+  async registrar(idUsuario, tipoRegistro, ip) {
+    idUsuario = validarId(idUsuario);
+    const usuario = await this.usuarios.buscarPorId(idUsuario);
+    if (!usuario) throw new AppError(404, 'El usuario no existe.');
+    // El administrador puede marcar desde cualquier red; la restricción es solo para empleados.
+    if (usuario.rol !== 'ADMINISTRADOR') await this.validarRed(ip);
     // Una única lectura del reloj local del servidor evita mezclar días al llegar a medianoche.
     const ahora = this.reloj();
     const pad = value => String(value).padStart(2, '0');
@@ -28,8 +41,8 @@ class AsistenciaService {
       throw error;
     }
   }
-  registrarEntrada(id) { return this.registrar(id, 'ENTRADA'); }
-  registrarSalida(id) { return this.registrar(id, 'SALIDA'); }
+  registrarEntrada(id, ip) { return this.registrar(id, 'ENTRADA', ip); }
+  registrarSalida(id, ip) { return this.registrar(id, 'SALIDA', ip); }
   listarTodos() { return this.registros.listarTodos(); }
   async listarPorUsuario(id) { return this.registros.listarPorUsuario(await this.validarUsuario(id)); }
   validarSecuencia(registros) {

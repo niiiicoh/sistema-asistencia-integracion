@@ -34,3 +34,9 @@ CREATE INDEX idx_registro_usuario_fecha
 
 CREATE INDEX idx_registro_fecha_tipo
     ON registros_asistencia (fecha, tipo_registro);
+
+CREATE TABLE IF NOT EXISTS configuracion (
+    clave VARCHAR(50) NOT NULL,
+    valor VARCHAR(255) NULL,
+    CONSTRAINT pk_configuracion PRIMARY KEY (clave)
+) ENGINE=InnoDB;

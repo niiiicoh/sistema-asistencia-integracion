@@ -12,6 +12,7 @@ La decisión tecnológica cambió antes de implementar: se utiliza una solución
 - Registrar entrada y salida con fecha y hora generadas en el servidor.
 - Consultar registros de asistencia generales o por usuario.
 - Impedir la eliminación de usuarios con asistencia, conservando sus registros.
+- Restringir opcionalmente el marcado de entrada/salida a una IP pública específica (red presencial de la oficina), configurable por el administrador.
 - Pruebas unitarias independientes de MySQL y pruebas HTTP con repositorios simulados.
 
 Avance #4 implementado: RE-01 atrasos, RE-02 salidas anticipadas y RE-03 inasistencias, con filtros por fecha y empleado, acceso exclusivo de administrador y pruebas unitarias/de integración. Sin gráficos ni exportaciones.
@@ -35,9 +36,12 @@ asistencia-web/
 │       ├── login.js
 │       ├── sesion.js
 │       ├── comun.js
+│       ├── inicio.js
 │       ├── reportes.js
 │       ├── usuarios.js
-│       └── asistencia.js
+│       ├── asistencia.js
+│       ├── historial.js
+│       └── configuracionRed.js
 ├── src/
 │   ├── config/database.js
 │   ├── models/
@@ -46,26 +50,31 @@ asistencia-web/
 │   ├── repositories/
 │   │   ├── ReporteRepository.js
 │   │   ├── UsuarioRepository.js
-│   │   └── RegistroAsistenciaRepository.js
+│   │   ├── RegistroAsistenciaRepository.js
+│   │   └── ConfiguracionRepository.js
 │   ├── middleware/auth.js
 │   ├── services/
 │   │   ├── ReporteService.js
 │   │   ├── AuthService.js
 │   │   ├── UsuarioService.js
-│   │   └── AsistenciaService.js
+│   │   ├── AsistenciaService.js
+│   │   └── ConfiguracionService.js
 │   ├── controllers/
 │   │   ├── reporteController.js
 │   │   ├── usuarioController.js
-│   │   └── asistenciaController.js
+│   │   ├── asistenciaController.js
+│   │   └── configuracionController.js
 │   ├── routes/
 │   │   ├── reporteRoutes.js
 │   │   ├── usuarioRoutes.js
-│   │   └── asistenciaRoutes.js
+│   │   ├── asistenciaRoutes.js
+│   │   └── configuracionRoutes.js
 │   └── utils/
 │       ├── esFechaValida.js
 │       ├── correoEmpresa.js
 │       ├── AppError.js
 │       ├── validarId.js
+│       ├── normalizarIp.js
 │       └── password.js
 ├── tests/
 │   ├── ReporteService.test.js
@@ -73,12 +82,14 @@ asistencia-web/
 │   ├── reporteFixtures.js
 │   ├── UsuarioService.test.js
 │   ├── AsistenciaService.test.js
+│   ├── ConfiguracionService.test.js
 │   ├── api.test.js
 │   └── helpers.js
 ├── scripts/verificar-reportes-db.js
 ├── scripts/crear-admin.js
 ├── database/schema.sql
 ├── database/migrations/001_nombre_apellido.sql
+├── database/migrations/002_configuracion.sql
 ├── .env.example
 ├── .gitignore
 ├── app.js
@@ -92,7 +103,7 @@ Las peticiones recorren frontend → rutas/controladores → servicios → repos
 
 ## Actualización del proyecto existente
 
-Para esta Semana 5 no se requiere importar SQL, crear cuentas ni ejecutar migraciones. Conservar .env y la base actual, ejecutar npm test y reiniciar npm start. El reinicio cierra las sesiones en memoria; volver a iniciar sesión.
+Para incorporar la restricción de red para marcar asistencia sobre una base ya existente, ejecutar una sola vez `database/migrations/002_configuracion.sql` (crea la tabla `configuracion`; no requiere crear cuentas nuevas). Conservar .env y la base actual, ejecutar npm test y reiniciar npm start. El reinicio cierra las sesiones en memoria; volver a iniciar sesión.
 
 ## Instalación y ejecución (solo para una instalación nueva)
 
@@ -156,7 +167,7 @@ Detener el servidor con Ctrl+C.
 ## Despliegue en Hostinger (hPanel, Node.js App)
 
 1. En hPanel &gt; Node.js, crear la aplicación indicando: versión de Node 20.x o superior, la carpeta del proyecto y `app.js` como archivo de inicio.
-2. Crear la base de datos MySQL desde hPanel &gt; Bases de datos e importar **todo** `database/schema.sql` (y `database/migrations/001_nombre_apellido.sql` solo si se parte de un esquema sin esa migración) usando phpMyAdmin.
+2. Crear la base de datos MySQL desde hPanel &gt; Bases de datos e importar **todo** `database/schema.sql` (y `database/migrations/001_nombre_apellido.sql` y `database/migrations/002_configuracion.sql` solo si se parte de un esquema sin esas migraciones) usando phpMyAdmin.
 3. Configurar las variables de entorno de la app (una por una o importando un `.env`): `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` con los datos de esa base, y `NODE_ENV=production`. No fijar `PORT` manualmente: Hostinger lo asigna y la app ya lo lee de `process.env.PORT`.
 4. Ejecutar "NPM Install" desde el panel (instala dependencias) y luego iniciar/reiniciar la app.
 5. Verificar que el dominio tenga SSL activo: con `NODE_ENV=production` la cookie de sesión exige HTTPS (`Secure`), y `trust proxy` queda habilitado para que la app confíe en las cabeceras `X-Forwarded-*` del proxy de Hostinger (necesario para el chequeo de origen y el límite de intentos de login).
@@ -173,6 +184,8 @@ Cada persona marca su propia entrada/salida; el backend toma su ID de la sesión
 Las marcas deben alternar ENTRADA y SALIDA: no se permite una SALIDA inicial, dos ENTRADAS consecutivas ni dos SALIDAS consecutivas. Una entrada puede cerrarse al día siguiente. Se usa el orden de fecha/hora y, en caso de empate, ID. Las correcciones también deben mantener la secuencia: para eliminar un par entrada/salida, eliminar primero la salida y después la entrada. Un cambio que deje una salida huérfana o dos entradas devuelve 409.
 
 Las operaciones sobre un mismo usuario bloquean su fila dentro de una transacción MySQL antes de consultar, validar y guardar. Esto impide entradas duplicadas por peticiones simultáneas. Las marcas normales usan la fecha/hora local del servidor; solo el administrador puede corregirlas explícitamente. Configurar la zona horaria del sistema operativo en Santiago si corresponde.
+
+El administrador puede definir en Control de asistencia una IP pública permitida para marcar. Si hay una IP configurada, un empleado solo puede registrar entrada o salida conectado a esa red; el administrador siempre puede marcar desde cualquier red. Ver "Restricción de red para marcar asistencia" para el detalle.
 
 ## API
 
@@ -192,6 +205,8 @@ Las operaciones sobre un mismo usuario bloquean su fila dentro de una transacci�
 | PUT | `/api/asistencia/:id` | Admin: corregir tipo, fecha y hora |
 | DELETE | `/api/asistencia/:id` | Admin: eliminar manteniendo la secuencia |
 | GET | `/api/asistencia/usuario/:id` | Registros del usuario |
+| GET | `/api/configuracion/ip-permitida` | Admin: IP permitida actual e IP del solicitante |
+| PUT | `/api/configuracion/ip-permitida` | Admin: definir o limpiar la IP permitida |
 
 Creación de usuario:
 
@@ -213,9 +228,11 @@ Las consultas utilizan parámetros `?`. Se normaliza el correo, se validan ID, r
 
 Las sesiones tienen un token aleatorio de 256 bits, duran 8 horas y se guardan en memoria: reiniciar Node cierra las sesiones. Cookie HttpOnly y SameSite=Strict, Secure en NODE_ENV=production (requiere HTTPS). La identidad y el rol se consultan en la base en cada petición; cambiar contraseña o eliminar el usuario invalida sus sesiones. Se limita el login a 10 intentos por minuto por IP, se verifica el origen en escrituras y se exige JSON. Es un prototipo local de un solo proceso; no tiene recuperación de contraseña, auditoría de correcciones ni paginación.
 
+La restricción de red para marcar asistencia es opcional (por defecto no hay ninguna IP configurada) y se aplica solo a empleados; el administrador queda siempre exento, tanto para marcar como para corregir o eliminar registros. La IP del cliente se obtiene de `req.ip`, que solo refleja la IP real detrás del proxy de Hostinger cuando `trust proxy` está habilitado (`NODE_ENV=production`).
+
 ## Pruebas
 
-Las pruebas Jest usan repositorios simulados y no necesitan MySQL. Cubren usuarios, generación de correos, autenticación, cierre de sesión, permisos, privacidad de marcaciones, alternancia, edición/eliminación administrativa, validaciones y manejo de errores. El conjunto tiene 88 pruebas en 5 suites: conserva las 47 pruebas anteriores y agrega 41 de reportes. La concurrencia se verificó adicionalmente contra MariaDB real. Consulta VERIFICACION.md.
+Las pruebas Jest usan repositorios simulados y no necesitan MySQL. Cubren usuarios, generación de correos, autenticación, cierre de sesión, permisos, privacidad de marcaciones, alternancia, edición/eliminación administrativa, validaciones, manejo de errores y la restricción de red para marcar asistencia. El conjunto tiene 103 pruebas en 6 suites. La concurrencia se verificó adicionalmente contra MariaDB real. Consulta VERIFICACION.md.
 
 ## Ampliación: nombre y apellido
 
@@ -260,3 +277,24 @@ npm test ejecuta las pruebas unitarias y HTTP con repositorios en memoria, sin n
     node scripts/verificar-reportes-db.js
 
 Requiere la conexión .env disponible y permiso CREATE TEMPORARY TABLES. Crea únicamente tablas temporales de conexión que ocultan las tablas originales durante la prueba, inserta fixtures allí y las descarta al finalizar. No escribe ni borra registros persistentes. Verifica umbrales, tipos, filtros, nombres históricos, correcciones, ausencia con una sola salida y rangos superiores a 1.000 días. Los 47 tests previos conservan sus archivos y siguen pasando.
+
+## Restricción de red para marcar asistencia
+
+El administrador puede, de forma opcional, restringir el marcado de entrada/salida a una única IP pública (por ejemplo, la IP de la red de la oficina). Es una restricción **presencial**: exige estar conectado físicamente a esa red al momento de marcar, no admite ni reemplaza un acceso remoto. Por defecto no hay ninguna IP configurada y el comportamiento no cambia respecto de versiones anteriores.
+
+Diseño:
+
+- La IP permitida se guarda como par clave/valor (`ip_permitida_asistencia`) en la nueva tabla `configuracion`, gestionada por `ConfiguracionRepository` y `ConfiguracionService`. Se valida que sea una IPv4 (cuatro octetos 0-255); se rechazan IPv6 y formatos inválidos con 400. Dejar el campo vacío limpia la restricción.
+- Se usa IPv4 y no IPv6 porque una IPv6 suele cambiar por dispositivo (extensiones de privacidad) y no identifica una red de forma estable, mientras que una IPv4 es típicamente compartida por todos los equipos detrás del mismo NAT.
+- `AsistenciaService.registrar` obtiene el usuario que marca y, **solo si su rol no es ADMINISTRADOR**, valida su IP contra la IP configurada (`validarRed`). El administrador puede marcar, corregir o eliminar registros desde cualquier red, sin excepción.
+- La IP del solicitante se toma de `req.ip` y se normaliza (`src/utils/normalizarIp.js`) para aceptar tanto `181.42.190.187` como su notación IPv4-mapped `::ffff:181.42.190.187`. En producción, `req.ip` solo refleja la IP real del cliente (y no la del proxy de Hostinger) porque `trust proxy` está habilitado bajo `NODE_ENV=production`.
+- Un empleado conectado desde una red distinta a la configurada recibe 403 con un mensaje explicativo al intentar marcar.
+
+Panel de administración: en Control de asistencia, la sección "Restricción de red para marcar" (visible solo para administradores) permite ver la IP configurada, escribir una nueva, limpiarla, o completarla automáticamente con el botón "Usar mi IP actual" (toma la IP con la que el propio administrador está navegando en ese momento). Como una IP pública residencial u office puede cambiar con el tiempo, este botón evita depender de recordar o buscar la IP manualmente cada vez que cambia.
+
+Endpoints (ambos exclusivos de administrador, devuelven 403 a empleados):
+
+- `GET /api/configuracion/ip-permitida` responde `{ ip, ipActual }`, donde `ip` es la restricción guardada (o `null` si no hay ninguna) e `ipActual` es la IP normalizada del propio solicitante.
+- `PUT /api/configuracion/ip-permitida` recibe `{ ip }`, valida el formato y responde `{ ip }` con el valor guardado; enviar una cadena vacía limpia la restricción.
+
+Para una base ya existente, ejecutar una sola vez `database/migrations/002_configuracion.sql` (crea la tabla `configuracion`). Una base nueva ya la incluye en `database/schema.sql`.

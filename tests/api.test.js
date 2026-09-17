@@ -72,3 +72,17 @@ test('errores internos no exponen detalles', async()=>{
  f.ur.listar=async()=>{throw new Error('mysql password=secreto');};
  const r=await admin.get('/api/usuarios').expect(500);expect(JSON.stringify(r.body)).not.toMatch(/secreto|stack/);
 });
+test('configuración de IP permitida es exclusiva de administrador', async()=>{
+ await empleado.get('/api/configuracion/ip-permitida').expect(403);
+ await empleado.put('/api/configuracion/ip-permitida').send({ip:'1.2.3.4'}).expect(403);
+});
+test('admin consulta y guarda la IP permitida', async()=>{
+ const inicial=await admin.get('/api/configuracion/ip-permitida').expect(200);
+ expect(inicial.body.ip).toBeNull();
+ expect(inicial.body).toHaveProperty('ipActual');
+ const guardado=await admin.put('/api/configuracion/ip-permitida').send({ip:'181.42.190.187'}).expect(200);
+ expect(guardado.body.ip).toBe('181.42.190.187');
+ await admin.put('/api/configuracion/ip-permitida').send({ip:'no-valida'}).expect(400);
+ await admin.put('/api/configuracion/ip-permitida').send({ip:''}).expect(200);
+ expect((await admin.get('/api/configuracion/ip-permitida').expect(200)).body.ip).toBeNull();
+});
