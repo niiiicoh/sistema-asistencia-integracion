@@ -14,10 +14,10 @@ function abrir(usuario = null) {
   contrasena.required = !usuario;
   document.getElementById('ayuda-clave').hidden = !usuario;
   document.getElementById('titulo-form').textContent = usuario ? 'Editar usuario' : 'Crear usuario';
-  editor.hidden = false; nombre.focus();
+  mostrarPanel(editor, true); nombre.focus();
 }
 document.getElementById('crear').onclick = () => abrir();
-document.getElementById('cancelar').onclick = () => { editor.hidden = true; editando = null; document.getElementById('crear').focus(); };
+document.getElementById('cancelar').onclick = () => { mostrarPanel(editor, false); editando = null; document.getElementById('crear').focus(); };
 async function cargar() {
   const usuarios = await api('/api/usuarios');
   body.replaceChildren();
@@ -30,7 +30,7 @@ async function cargar() {
     del.onclick = async () => {
       if (!confirm(`¿Eliminar al usuario ${usuario.correo}?`)) return;
       del.disabled = true;
-      try { await api(`/api/usuarios/${usuario.idUsuario}`, { method: 'DELETE' }); if (editando === usuario.idUsuario) { editor.hidden = true; editando = null; } mensaje('Usuario eliminado correctamente.'); await refrescar(); }
+      try { await api(`/api/usuarios/${usuario.idUsuario}`, { method: 'DELETE' }); if (editando === usuario.idUsuario) { mostrarPanel(editor, false); editando = null; } mensaje('Usuario eliminado correctamente.'); await refrescar(); }
       catch (error) { mensaje(error.message, true); }
       finally { del.disabled = false; }
     };
@@ -47,7 +47,7 @@ form.onsubmit = async event => {
   const id = editando;
   try {
     const guardado = await api(id === null ? '/api/usuarios' : `/api/usuarios/${id}`, { method: id === null ? 'POST' : 'PUT', body: JSON.stringify(datos) });
-    editor.hidden = true; form.reset(); editando = null;
+    mostrarPanel(editor, false); form.reset(); editando = null;
     mensaje(id === null ? `Usuario creado. Correo de acceso: ${guardado.correo}` : 'Usuario actualizado correctamente.'); await refrescar();
   } catch (error) { mensaje(error.message, true); }
   finally { guardar.disabled = false; }

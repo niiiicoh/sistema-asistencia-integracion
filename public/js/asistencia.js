@@ -1,6 +1,7 @@
 const entrada = document.getElementById('entrada');
 const salida = document.getElementById('salida');
 const body = document.getElementById('registros');
+const editorRegistro = document.getElementById('editor-registro');
 let usuarioActual, editandoRegistro = null;
 async function cargarRegistros() {
   entrada.disabled = salida.disabled = true;
@@ -33,14 +34,14 @@ async function cargarRegistros() {
           document.getElementById('tipo-registro').value = registro.tipoRegistro;
           document.getElementById('fecha-registro').value = registro.fecha;
           document.getElementById('hora-registro').value = registro.hora;
-          document.getElementById('editor-registro').hidden = false;
+          mostrarPanel(editorRegistro, true);
           document.getElementById('tipo-registro').focus();
         };
         const eliminar = document.createElement('button'); eliminar.textContent = 'Eliminar'; eliminar.className = 'danger';
         eliminar.onclick = async () => {
           if (!confirm(`¿Eliminar ${registro.tipoRegistro} de ${registro.usuario} del ${registro.fecha} a las ${registro.hora}?`)) return;
           eliminar.disabled = true;
-          try { await api(`/api/asistencia/${registro.idRegistro}`, { method: 'DELETE' }); document.getElementById('editor-registro').hidden = true; mensaje('Registro eliminado.'); await cargarRegistros(); }
+          try { await api(`/api/asistencia/${registro.idRegistro}`, { method: 'DELETE' }); mostrarPanel(editorRegistro, false); mensaje('Registro eliminado.'); await cargarRegistros(); }
           catch (error) { mensaje(error.message, true); eliminar.disabled = false; }
         };
         wrap.append(editar, eliminar);
@@ -58,13 +59,13 @@ async function registrar(tipo) {
   } catch (error) { mensaje(error.message, true); }
   finally { await cargarRegistros(); }
 }
-document.getElementById('cancelar-registro').onclick = () => { document.getElementById('editor-registro').hidden = true; editandoRegistro = null; };
+document.getElementById('cancelar-registro').onclick = () => { mostrarPanel(editorRegistro, false); editandoRegistro = null; };
 document.getElementById('form-registro').onsubmit = async event => {
   event.preventDefault(); const boton = document.getElementById('guardar-registro'); boton.disabled = true;
   let hora = document.getElementById('hora-registro').value; if (hora.length === 5) hora += ':00';
   try {
     await api(`/api/asistencia/${editandoRegistro}`, { method: 'PUT', body: JSON.stringify({ tipoRegistro: document.getElementById('tipo-registro').value, fecha: document.getElementById('fecha-registro').value, hora }) });
-    document.getElementById('editor-registro').hidden = true; mensaje('Registro actualizado.'); await cargarRegistros();
+    mostrarPanel(editorRegistro, false); mensaje('Registro actualizado.'); await cargarRegistros();
   } catch (error) { mensaje(error.message, true); }
   finally { boton.disabled = false; }
 };

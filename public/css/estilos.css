@@ -69,6 +69,8 @@ button.cargando::after { content: ''; position: absolute; top: 50%; left: 50%; w
 
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; margin-bottom: 30px; }
 .panel h2 { margin-bottom: 22px; }
+.panel.desplegable { overflow: hidden; max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; margin-bottom: 0; border-width: 0; transition: max-height .3s ease, opacity .22s ease, padding .3s ease, margin-bottom .3s ease, border-width .3s ease; }
+.panel.desplegable.abierto { max-height: 600px; opacity: 1; padding-top: 28px; padding-bottom: 28px; margin-bottom: 30px; border-width: 1px; }
 .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 26px; margin-bottom: 26px; }
 label { display: block; font-size: .9rem; font-weight: 600; }
 input, select { display: block; width: 100%; min-width: 0; min-height: 46px; margin-top: 9px; padding: 11px 13px; color: var(--ink); background: #fff; border: 1px solid #bcc3cc; border-radius: 2px; line-height: 1.4; }

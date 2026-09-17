@@ -14,6 +14,16 @@ function mensaje(texto, error = false) {
   void element.offsetWidth;
   element.classList.add('mensaje-anim');
 }
+function mostrarPanel(elemento, mostrar) {
+  if (mostrar) {
+    elemento.hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => elemento.classList.add('abierto')));
+  } else {
+    elemento.classList.remove('abierto');
+    const alTerminar = evento => { if (evento.target === elemento && evento.propertyName === 'max-height') { elemento.hidden = true; elemento.removeEventListener('transitionend', alTerminar); } };
+    elemento.addEventListener('transitionend', alTerminar);
+  }
+}
 function celda(row, text) { const td = document.createElement('td'); td.textContent = text; row.append(td); return td; }
 function tablaVacia(body, texto) { body.replaceChildren(); const row = body.insertRow(); const td = celda(row, texto); td.colSpan = body.closest('table').querySelectorAll('thead th').length; td.className = 'empty'; }
 function dibujarBarras(svg, datos, { etiqueta = clave => clave, titulo = (etq, valor) => `${etq}: ${valor}`, alClic } = {}) {
