@@ -165,6 +165,8 @@ body.vista-empleado tr.day-row:hover td { background: #f2f4f6; }
 .leyenda-proporcion .punto { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .leyenda-proporcion .punto.bien { background: var(--status-bien); }
 .leyenda-proporcion .punto.atraso { background: var(--wine); }
+.leyenda-proporcion li.clicable { padding: 6px 8px; margin: 0 -8px; border-radius: 4px; }
+.leyenda-proporcion li.clicable:hover { background: #eef0f2; color: var(--ink); }
 
 .ranking { max-height: 260px; overflow-y: auto; }
 .ranking:empty::after { content: 'Sin datos para graficar.'; color: var(--muted); font-size: .9rem; }

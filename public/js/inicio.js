@@ -40,19 +40,30 @@ function dibujarGraficoPuntualidad(registros) {
   const entradasHoy = registros.filter(r => r.fecha === hoy && r.tipoRegistro === 'ENTRADA');
   const contenedor = document.getElementById('grafico-puntualidad');
   if (!entradasHoy.length) return;
-  const aTiempo = entradasHoy.filter(r => r.hora <= '09:30:00').length;
-  const atrasados = entradasHoy.length - aTiempo;
+  const listaATiempo = entradasHoy.filter(r => r.hora <= '09:30:00');
+  const listaAtrasados = entradasHoy.filter(r => r.hora > '09:30:00');
+  const aTiempo = listaATiempo.length, atrasados = listaAtrasados.length;
   const pct = n => Math.round(n / entradasHoy.length * 100);
   contenedor.innerHTML = `
     <div class="proporcion"><span class="segmento bien" style="width:0%"></span><span class="segmento atraso" style="width:0%"></span></div>
     <ul class="leyenda-proporcion">
-      <li><span class="punto bien"></span>A tiempo <strong>${aTiempo}</strong> (${pct(aTiempo)}%)</li>
-      <li><span class="punto atraso"></span>Atrasados <strong>${atrasados}</strong> (${pct(atrasados)}%)</li>
+      <li class="clicable" data-cual="bien"><span class="punto bien"></span>A tiempo <strong>${aTiempo}</strong> (${pct(aTiempo)}%)</li>
+      <li class="clicable" data-cual="atraso"><span class="punto atraso"></span>Atrasados <strong>${atrasados}</strong> (${pct(atrasados)}%)</li>
     </ul>`;
   requestAnimationFrame(() => requestAnimationFrame(() => {
     contenedor.querySelector('.bien').style.width = `${pct(aTiempo)}%`;
     contenedor.querySelector('.atraso').style.width = `${pct(atrasados)}%`;
   }));
+  const verDetalle = (cual, ancla) => {
+    const lista = cual === 'bien' ? listaATiempo : listaAtrasados;
+    const personas = lista.sort((a, b) => a.hora.localeCompare(b.hora)).map(r => `${r.usuario} · ${r.hora}`);
+    mostrarPopoverGrafico(ancla, cual === 'bien' ? `Llegaron a tiempo (${aTiempo})` : `Llegaron atrasados (${atrasados})`, personas);
+  };
+  contenedor.querySelectorAll('.segmento, .clicable').forEach(el => {
+    const cual = el.classList.contains('bien') || el.dataset.cual === 'bien' ? 'bien' : 'atraso';
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', () => verDetalle(cual, el));
+  });
 }
 async function cargarResumen() {
   try {
