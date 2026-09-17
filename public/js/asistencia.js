@@ -47,6 +47,7 @@ async function cargarRegistros() {
         wrap.append(editar, eliminar);
       }
     }
+    animarTabla(body);
   } catch (error) { tablaVacia(body, 'No se pudieron cargar los registros. Recarga la página para reintentar.'); mensaje(error.message, true); }
 }
 async function registrar(tipo) {

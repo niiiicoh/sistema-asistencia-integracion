@@ -36,6 +36,7 @@ async function cargar() {
     };
     wrap.append(edit, del);
   }
+  animarTabla(body);
 }
 async function refrescar() {
   try { await cargar(); } catch (error) { tablaVacia(body, 'No se pudo cargar el listado. Recarga la página para reintentar.'); mensaje(error.message, true); }

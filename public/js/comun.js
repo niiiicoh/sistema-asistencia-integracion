@@ -14,6 +14,11 @@ function mensaje(texto, error = false) {
   void element.offsetWidth;
   element.classList.add('mensaje-anim');
 }
+function animarTabla(tbody) {
+  tbody.classList.remove('tabla-anim');
+  void tbody.offsetWidth;
+  tbody.classList.add('tabla-anim');
+}
 function mostrarPanel(elemento, mostrar) {
   if (mostrar) {
     elemento.hidden = false;

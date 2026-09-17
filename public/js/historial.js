@@ -19,5 +19,6 @@ window.sesionLista.then(async usuario => {
       const badge = document.createElement('span'); badge.className = `badge ${registro.tipoRegistro}`; badge.textContent = registro.tipoRegistro === 'ENTRADA' ? 'Entrada' : 'Salida'; celda(row, '').append(badge);
       celda(row, registro.fecha.split('-').reverse().join('/')); celda(row, registro.hora);
     }
+    animarTabla(body);
   } catch (error) { tablaVacia(body, 'No se pudo cargar el historial. Recarga la página para reintentar.'); mensaje(error.message, true); }
 });
