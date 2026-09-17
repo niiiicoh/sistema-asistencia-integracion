@@ -46,6 +46,9 @@ test('marcas propias, fecha del servidor, sin salida inicial ni entradas repetid
  expect((await empleado.get('/api/asistencia')).body).toHaveLength(2);
  expect((await admin.get('/api/asistencia')).body).toHaveLength(3);
  await admin.delete('/api/usuarios/2').expect(409);
+ await admin.delete('/api/usuarios/2?forzar=true').expect(200);
+ await admin.get('/api/usuarios/2').expect(404);
+ expect((await admin.get('/api/asistencia')).body).toHaveLength(1);
 });
 test('admin modifica y elimina manteniendo secuencia válida', async()=>{
  const a=await empleado.post('/api/asistencia/entrada').send({}).expect(201);

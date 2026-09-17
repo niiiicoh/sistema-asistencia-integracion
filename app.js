@@ -70,7 +70,7 @@ if (process.env.NODE_ENV !== 'test') {
   const app = createApp({
     authService: new (require('./src/services/AuthService'))(usuarios),
     reporteService: new (require('./src/services/ReporteService'))(new (require('./src/repositories/ReporteRepository'))(db), usuarios),
-    usuarioService: new (require('./src/services/UsuarioService'))(usuarios),
+    usuarioService: new (require('./src/services/UsuarioService'))(usuarios, undefined, registros),
     asistenciaService: new (require('./src/services/AsistenciaService'))(registros, usuarios, undefined, configuracionService),
     configuracionService
   });

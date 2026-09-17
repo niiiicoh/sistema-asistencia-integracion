@@ -3,7 +3,7 @@ const AppError = require('../utils/AppError');
 const validarId = require('../utils/validarId');
 const hashPassword = require('../utils/password');
 class UsuarioService {
-  constructor(repository, hash = hashPassword) { this.repository = repository; this.hash = hash; }
+  constructor(repository, hash = hashPassword, registros = null) { this.repository = repository; this.hash = hash; this.registros = registros; }
   listar() { return this.repository.listar(); }
   async buscarPorId(id) {
     const usuario = await this.repository.buscarPorId(validarId(id));
@@ -47,9 +47,10 @@ class UsuarioService {
     });
     return usuario;
   }
-  async eliminar(id) {
+  async eliminar(id, forzar = false) {
     const usuario = await this.buscarPorId(id);
     try {
+      if (forzar) await this.registros.eliminarPorUsuario(usuario.idUsuario);
       if (!await this.repository.eliminar(usuario.idUsuario)) throw new AppError(404, 'El usuario no existe.');
     } catch (error) {
       if (error.code === 'ER_ROW_IS_REFERENCED_2') throw new AppError(409, 'No se puede eliminar el usuario porque tiene registros de asistencia asociados.');

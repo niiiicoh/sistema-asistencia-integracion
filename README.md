@@ -11,7 +11,7 @@ La decisión tecnológica cambió antes de implementar: se utiliza una solución
 - Correo empresarial automático a partir del nombre y apellido.
 - Registrar entrada y salida con fecha y hora generadas en el servidor.
 - Consultar registros de asistencia generales o por usuario.
-- Impedir la eliminación de usuarios con asistencia, conservando sus registros.
+- Impedir por defecto la eliminación de usuarios con asistencia, conservando sus registros; permitir forzarla explícitamente borrando también sus marcaciones.
 - Restringir opcionalmente el marcado de entrada/salida a una IP pública específica (red presencial de la oficina), configurable por el administrador.
 - Pruebas unitarias independientes de MySQL y pruebas HTTP con repositorios simulados.
 
@@ -180,6 +180,8 @@ Al iniciar sesión, el administrador accede al menú general y el empleado va di
 
 El administrador crea usuarios ingresando nombre, apellido, contraseña y rol. El correo se asigna al guardar: Bastián Alegría produce bastian.alegria@empresa.cl. Se eliminan tildes, se utilizan minúsculas y los espacios se convierten en puntos. Para homónimos se agrega un número (bastian.alegria2@empresa.cl). No se crea un buzón de correo real: es el identificador de acceso. El correo se conserva al editar, aunque se cambie el nombre. Una contraseña vacía en el formulario de edición conserva la anterior.
 
+Al eliminar un usuario que ya tiene marcaciones, la interfaz avisa que no se puede sin antes borrar también su historial de asistencia y ofrece un segundo paso explícito ("Eliminar todo") que sí lo hace, dejando claro que esa acción es permanente. Sin ese segundo paso, el usuario y sus marcaciones se conservan intactos.
+
 Cada persona marca su propia entrada/salida; el backend toma su ID de la sesión e ignora un ID enviado por el navegador. Un empleado no puede ver registros ajenos ni modificar o eliminar registros. El administrador ve todos los registros y dispone de Editar/Eliminar. La edición permite corregir tipo, fecha y hora; no permite reasignar un registro a otra persona.
 
 Control de asistencia es también la página de inicio del empleado (no existe una página "Historial" separada: se fusionó, ya que mostraba los mismos datos). Además de marcar entrada/salida y ver "Mis marcaciones" agrupadas por día, el empleado ve un resumen de su semana (días trabajados y horas trabajadas, calculadas emparejando sus propias marcas ENTRADA/SALIDA de los últimos 7 días) y un gráfico de sus marcaciones por día, calculados en el navegador a partir de los mismos datos que ya se cargan para la tabla, sin llamadas adicionales al servidor.
@@ -201,7 +203,8 @@ El administrador puede definir en Control de asistencia una IP pública permitid
 | GET | `/api/usuarios/:id` | Usuario por ID |
 | POST | `/api/usuarios` | Crear usuario (201) |
 | PUT | `/api/usuarios/:id` | Actualizar campos enviados |
-| DELETE | `/api/usuarios/:id` | Eliminar sin borrar asistencias |
+| DELETE | `/api/usuarios/:id` | Eliminar sin borrar asistencias (409 si tiene registros) |
+| DELETE | `/api/usuarios/:id?forzar=true` | Eliminar el usuario y borrar también sus registros de asistencia |
 | POST | `/api/asistencia/entrada` | Registrar entrada (201) |
 | POST | `/api/asistencia/salida` | Registrar salida (201) |
 | GET | `/api/asistencia` | Admin: todos; empleado: propios |
@@ -236,7 +239,7 @@ La restricción de red para marcar asistencia es opcional (por defecto no hay ni
 
 ## Pruebas
 
-Las pruebas Jest usan repositorios simulados y no necesitan MySQL. Cubren usuarios, generación de correos, autenticación, cierre de sesión, permisos, privacidad de marcaciones, alternancia, edición/eliminación administrativa, validaciones, manejo de errores y la restricción de red para marcar asistencia. El conjunto tiene 110 pruebas en 6 suites. La concurrencia se verificó adicionalmente contra MariaDB real. Consulta VERIFICACION.md.
+Las pruebas Jest usan repositorios simulados y no necesitan MySQL. Cubren usuarios, generación de correos, autenticación, cierre de sesión, permisos, privacidad de marcaciones, alternancia, edición/eliminación administrativa, validaciones, manejo de errores y la restricción de red para marcar asistencia. El conjunto tiene 111 pruebas en 6 suites. La concurrencia se verificó adicionalmente contra MariaDB real. Consulta VERIFICACION.md.
 
 ## Ampliación: nombre y apellido
 

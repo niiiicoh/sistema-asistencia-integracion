@@ -4,7 +4,7 @@ async function api(url, options = {}) {
   catch { throw new Error('No se pudo conectar con el servidor. Inténtalo nuevamente.'); }
   const data = await response.json();
   if (response.status === 401 && !url.endsWith('/login')) location.replace('/login.html');
-  if (!response.ok) throw new Error(data.mensaje || 'No se pudo completar la operación.');
+  if (!response.ok) { const error = new Error(data.mensaje || 'No se pudo completar la operación.'); error.status = response.status; throw error; }
   return data;
 }
 function mensaje(texto, error = false) {

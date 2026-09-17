@@ -24,6 +24,7 @@ class RegistroAsistenciaRepository {
     return this.buscarPorId(id);
   }
   async eliminar(id) { await this.db.execute('DELETE FROM registros_asistencia WHERE id_registro = ?', [id]); }
+  async eliminarPorUsuario(idUsuario) { await this.db.execute('DELETE FROM registros_asistencia WHERE id_usuario = ?', [idUsuario]); }
   async registrar(registro) {
     const [result] = await this.db.execute('INSERT INTO registros_asistencia (id_usuario, tipo_registro, fecha, hora) VALUES (?, ?, ?, ?)', [registro.idUsuario, registro.tipoRegistro, registro.fecha, registro.hora]);
     registro.idRegistro = result.insertId;

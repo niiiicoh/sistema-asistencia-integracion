@@ -2,11 +2,12 @@ const UsuarioService = require('../src/services/UsuarioService');
 const Usuario = require('../src/models/Usuario');
 const hashPassword = require('../src/utils/password');
 const datos = { nombre: 'Ana', apellido: 'Pérez', correo: 'persona@ejemplo.cl', contrasena: 'secreto', rol: 'EMPLEADO' };
-let repo, service;
+let repo, registros, service;
 beforeEach(() => {
   repo = { listar: jest.fn(), buscarPorId: jest.fn(), buscarPorCorreo: jest.fn().mockResolvedValue(null),
     crear: jest.fn().mockImplementation(async u => { u.idUsuario = 1; return u; }), modificar: jest.fn().mockResolvedValue(1), eliminar: jest.fn().mockResolvedValue(1) };
-  service = new UsuarioService(repo, async () => 'hash-seguro');
+  registros = { eliminarPorUsuario: jest.fn().mockResolvedValue() };
+  service = new UsuarioService(repo, async () => 'hash-seguro', registros);
 });
 test('crear usuario válido y guardar contraseña transformada', async () => {
   const result = await service.crear(datos);
@@ -61,6 +62,13 @@ test('rechazar eliminación de usuario inexistente', async () => { await expect(
 test('devolver conflicto al eliminar usuario con asistencia', async () => {
   repo.buscarPorId.mockResolvedValue({ idUsuario: 1 }); repo.eliminar.mockRejectedValue({ code: 'ER_ROW_IS_REFERENCED_2' });
   await expect(service.eliminar(1)).rejects.toMatchObject({ status: 409, message: expect.stringContaining('asistencia') });
+  expect(registros.eliminarPorUsuario).not.toHaveBeenCalled();
+});
+test('forzar eliminación borra primero los registros de asistencia del usuario', async () => {
+  repo.buscarPorId.mockResolvedValue({ idUsuario: 1 });
+  await service.eliminar(1, true);
+  expect(registros.eliminarPorUsuario).toHaveBeenCalledWith(1);
+  expect(repo.eliminar).toHaveBeenCalledWith(1);
 });
 test('traducir duplicado concurrente de MySQL', async () => {
   repo.crear.mockRejectedValue({ code: 'ER_DUP_ENTRY' }); await expect(service.crear(datos)).rejects.toMatchObject({ status: 409 });

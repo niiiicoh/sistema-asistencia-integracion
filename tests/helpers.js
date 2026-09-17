@@ -26,7 +26,8 @@ async function fixture() {
     listarPorUsuario: async id => registros.filter(r => r.idUsuario === Number(id)).reverse(),
     buscarPorId: async id => registros.find(r => String(r.idRegistro) === String(id)),
     modificar: async (id, r) => { const i = registros.findIndex(r => String(r.idRegistro) === String(id)); registros[i] = r; return r; },
-    eliminar: async id => { registros.splice(registros.findIndex(r => String(r.idRegistro) === String(id)), 1); }
+    eliminar: async id => { registros.splice(registros.findIndex(r => String(r.idRegistro) === String(id)), 1); },
+    eliminarPorUsuario: async idUsuario => { for (let i = registros.length - 1; i >= 0; i--) if (registros[i].idUsuario === Number(idUsuario)) registros.splice(i, 1); }
   };
   let nextIp = 1; const ips = [];
   const cr = {
@@ -35,7 +36,7 @@ async function fixture() {
     eliminarIp: async idIp => { const i = ips.findIndex(fila => fila.idIp === Number(idIp)); if (i >= 0) ips.splice(i, 1); }
   };
   const configuracionService = new ConfiguracionService(cr);
-  const usuarioService = new UsuarioService(ur);
+  const usuarioService = new UsuarioService(ur, undefined, rr);
   const asistenciaService = new AsistenciaService(rr, ur, () => new Date(2026, 8, 9, 8, 5, 3), configuracionService);
   const authService = new AuthService(ur);
   return { app: createApp({ usuarioService, asistenciaService, authService, configuracionService }), usuarioService, asistenciaService, authService, configuracionService, ur, rr, cr, registros };

@@ -30,14 +30,22 @@ async function cargar() {
     del.onclick = async () => {
       if (!await confirmar(`¿Eliminar al usuario ${usuario.correo}?`)) return;
       del.disabled = true;
-      try { await api(`/api/usuarios/${usuario.idUsuario}`, { method: 'DELETE' }); if (editando === usuario.idUsuario) { mostrarPanel(editor, false); editando = null; } mensaje('Usuario eliminado correctamente.'); await refrescar(); }
-      catch (error) { mensaje(error.message, true); }
+      try { await eliminarUsuario(usuario.idUsuario); if (editando === usuario.idUsuario) { mostrarPanel(editor, false); editando = null; } mensaje('Usuario eliminado correctamente.'); await refrescar(); }
+      catch (error) {
+        if (error.status === 409) {
+          if (await confirmar(`El usuario ${usuario.correo} tiene registros de asistencia. Si continúas, se eliminarán también todas sus marcaciones de forma permanente y no podrán recuperarse. ¿Eliminar de todas formas?`, { textoConfirmar: 'Eliminar todo' })) {
+            try { await eliminarUsuario(usuario.idUsuario, true); if (editando === usuario.idUsuario) { mostrarPanel(editor, false); editando = null; } mensaje('Usuario y sus registros de asistencia eliminados.'); await refrescar(); }
+            catch (error2) { mensaje(error2.message, true); }
+          }
+        } else mensaje(error.message, true);
+      }
       finally { del.disabled = false; }
     };
     wrap.append(edit, del);
   }
   animarTabla(body);
 }
+function eliminarUsuario(id, forzar = false) { return api(`/api/usuarios/${id}${forzar ? '?forzar=true' : ''}`, { method: 'DELETE' }); }
 async function refrescar() {
   try { await cargar(); } catch (error) { tablaVacia(body, 'No se pudo cargar el listado. Recarga la página para reintentar.'); mensaje(error.message, true); }
 }
