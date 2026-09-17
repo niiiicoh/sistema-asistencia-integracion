@@ -2,6 +2,8 @@ function animarReloj() {
   const ahora = new Date();
   const gradosHora = (ahora.getHours() % 12 + ahora.getMinutes() / 60) * 30;
   const gradosMinuto = ahora.getMinutes() * 6;
+  const segundero = document.querySelector('.hand-segundo');
+  if (segundero) segundero.style.animationDelay = `-${ahora.getSeconds()}s`;
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const hora = document.querySelector('.hand-hora'); const minuto = document.querySelector('.hand-minuto');
     if (hora) hora.style.transform = `rotate(${gradosHora}deg)`;
