@@ -47,19 +47,35 @@ Notas para el reviewer
 
 `<tipo>` sigue Conventional Commits (`fix`, `feat`, `refactor`, `docs`, `chore`, `test`). `<alcance>` es el módulo o área tocada (ej. `readme`, `auth`, `reportes`).
 
+### Caso especial: commits en la rama `TESTING`
+
+Si la rama activa es `TESTING` (ver `refs/heads/TESTING` — en Windows `git branch --show-current` es más confiable que `git log TESTING` por el choque de nombre con la carpeta `testing/`):
+
+- Antes de commitear, revisa si `main` avanzó desde que `TESTING` se actualizó por última vez (`git log main..TESTING` y `git log TESTING..main`). Si `main` tiene commits nuevos, tráelos a `TESTING` (merge o rebase) **antes** de agregar el commit de testing, para que la única diferencia entre ambas ramas siga siendo la carpeta `testing/`, nunca el código.
+- El mensaje agrega una sección `Resultado` (después de "Cambios clave", antes de "Cómo probarlo") con las cifras reales de la corrida, nunca una descripción vaga:
+
+  ```
+  Resultado
+  - Jest: <X>/<Y> pruebas OK
+  - Playwright E2E: <X>/<Y> pasos OK (si hubo fallas: cuáles y si se corrigieron o quedan pendientes)
+  ```
+
+  Si algo falló y no se corrigió, se declara igual, no se omite ni se maquilla.
+- `TESTING` nunca se mergea de vuelta a `main`.
+
 ## 4. Confirmar antes de commitear
 
 Muestra el mensaje propuesto al usuario y espera confirmación antes de ejecutar `git commit`, salvo que el usuario ya haya pedido explícitamente "hazlo sin preguntar" en este turno.
 
 ## 5. Commitear y subir
 
-Haz `git add` solo de los archivos relevantes (nunca `git add -A` a ciegas), crea el commit y luego haz **siempre** `git push origin main` a continuación (no esperes una confirmación aparte para el push; ya está autorizado como parte de este flujo).
+Haz `git add` solo de los archivos relevantes (nunca `git add -A` a ciegas), crea el commit y luego haz **siempre** `git push` de la rama activa a **ambos** remotos configurados (`hostinger` y `origin`) a continuación (no esperes una confirmación aparte para el push; ya está autorizado como parte de este flujo).
 
-Nunca uses `--force`, `--no-verify`, ni saltes hooks para lograr que el push pase. Si el push es rechazado (rama divergida), no fuerces nada: investiga primero con `git fetch origin` y `git log` (local vs. `origin/main`) para entender qué cambió del lado remoto, y decide con esa información cómo seguir (por ejemplo, `git pull --rebase` o avisar al usuario si hay un conflicto real).
+Nunca uses `--force`, `--no-verify`, ni saltes hooks para lograr que el push pase. Si el push es rechazado (rama divergida) en cualquiera de los dos remotos, no fuerces nada: investiga primero con `git fetch <remoto>` y `git log` (local vs. `<remoto>/<rama>`) para entender qué cambió del lado remoto, y decide con esa información cómo seguir (por ejemplo, `git pull --rebase` o avisar al usuario si hay un conflicto real).
 
 ## 6. Responder al usuario
 
-Una vez que el push termine, obtén el hash del commit (`git log -1 --format=%H`) y la URL del remoto con `git remote get-url origin` (no la asumas ni la hardcodees). Si esa URL trae un usuario embebido (`https://usuario@github.com/...`, usado para evitar el selector de cuentas de Git Credential Manager), quítalo antes de mostrarlo — el link final debe verse como `https://github.com/<owner>/<repo>/commit/<hash>`, sin credenciales ni `.git` al final.
+Una vez que el push termine, obtén el hash del commit (`git log -1 --format=%H`) y la URL de cada remoto al que se subió con `git remote get-url <remoto>` (no la asumas ni la hardcodees). Si esa URL trae un usuario embebido (`https://usuario@github.com/...`, usado para evitar el selector de cuentas de Git Credential Manager), quítalo antes de mostrarlo — el link final debe verse como `https://github.com/<owner>/<repo>/commit/<hash>`, sin credenciales ni `.git` al final. Como el hash es el mismo en ambos repos, muestra los dos links (uno por remoto) dentro de la misma caja de resultado en vez de repetir todo el bloque.
 
 Para la segunda caja no repitas la lista de archivos con su estado (eso ya lo dice git); resume en 1-3 líneas cortas **qué se hizo**, en lenguaje simple — básicamente la sección "Cambios clave" del mensaje de commit pero condensada, no copiada tal cual.
 
